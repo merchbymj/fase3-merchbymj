@@ -800,12 +800,9 @@ async function generate(){
   }
 }
 function dlOne(fname,type){var blob=(type==='raw'?rawBlobs:processedBlobs)[fname];if(!blob){alert('Not available');return;}var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;a.click();}
-// CHANGE 7: downloadZip — folder picker + progress
+// CHANGE 7b: downloadZip — usa savedDirHandle si existe, sino descarga directo a Downloads
 async function downloadZip(type){
   var blobs=type==='raw'?rawBlobs:processedBlobs;if(!Object.keys(blobs).length){alert('No images');return;}
-  // Ask where to save
-  var dirHandle=null;
-  try{dirHandle=await window.showDirectoryPicker({mode:'readwrite'});}catch(e){if(e.name==='AbortError')return;}
   var btn=document.getElementById(type==='raw'?'dlRawBtn':'dlAllBtn');
   var origText=btn.textContent;
   btn.disabled=true;
@@ -819,13 +816,15 @@ async function downloadZip(type){
     btn.textContent='Compressing '+Math.round(meta.percent)+'%...';
   });
   var zipName=currentCode+'_'+type+'.zip';
-  if(dirHandle){
+  if(savedDirHandle){
+    // Si hay folder seleccionado, guarda ahí
     btn.textContent='Saving...';
     try{
-      var fh=await dirHandle.getFileHandle(zipName,{create:true}),w=await fh.createWritable();
+      var fh=await savedDirHandle.getFileHandle(zipName,{create:true}),w=await fh.createWritable();
       await w.write(zipBlob);await w.close();
     }catch(e){alert('Error saving: '+e.message);}
   } else {
+    // Sin folder seleccionado → descarga directo a Downloads (funciona con Claude in Chrome)
     var a=document.createElement('a');a.href=URL.createObjectURL(zipBlob);a.download=zipName;a.click();
   }
   btn.textContent=origText;btn.disabled=false;
