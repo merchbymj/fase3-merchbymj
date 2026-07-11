@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROMPTS AUDIT — Red White and Feral</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f0f;color:#e0e0e0;min-height:100vh;padding:1rem}
+.wrap{max-width:900px;margin:0 auto}
+h1{font-size:18px;font-weight:500;margin-bottom:1rem;color:#fff}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+.prog{font-size:13px;color:#888}
+.stats{display:flex;gap:6px;flex-wrap:wrap}
+.stat{font-size:12px;padding:3px 10px;border-radius:6px;border:1px solid #333;color:#888;background:#1a1a1a}
+.stat.ok{border-color:#2d5a2d;color:#4caf50;background:#1a2e1a}
+.stat.bad{border-color:#5a2d2d;color:#f44336;background:#2e1a1a}
+.stat.sk{border-color:#5a4d2d;color:#ff9800;background:#2e2a1a}
+.card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.chdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;gap:12px}
+.pname{font-size:15px;font-weight:500;color:#fff;margin-bottom:6px}
+.meta{display:flex;gap:5px;flex-wrap:wrap}
+.bdg{font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid #333;color:#888;background:#111}
+.bdg.yes{border-color:#2d5a2d;color:#4caf50;background:#1a2e1a}
+.bdg.no{border-color:#5a2d2d;color:#f44336;background:#2e1a1a}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+.lbl{font-size:11px;color:#555;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.ibox{border:1px solid #2a2a2a;border-radius:6px;background:#111;min-height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ibox img{width:100%;max-height:300px;object-fit:contain;display:block}
+.noimg{color:#444;font-size:13px;text-align:center;padding:1rem;line-height:1.8}
+.noimg a{color:#4a9eff;text-decoration:none}
+.ptext{font-size:12px;line-height:1.7;color:#999;border:1px solid #2a2a2a;border-radius:6px;padding:.75rem;background:#111;overflow-y:auto;max-height:300px;min-height:220px}
+.fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem}
+@media(max-width:500px){.fields{grid-template-columns:1fr}}
+.field label{font-size:11px;color:#555;display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+.field input,.field select{width:100%;font-size:13px;padding:7px 10px;border-radius:6px;border:1px solid #2a2a2a;background:#111;color:#e0e0e0;outline:none}
+.field input:focus,.field select:focus{border-color:#444}
+.field select option{background:#1a1a1a}
+.acts{display:flex;gap:8px;margin-bottom:8px}
+.btn{flex:1;padding:10px;border-radius:6px;border:1px solid #333;background:transparent;font-size:13px;font-weight:500;cursor:pointer;color:#e0e0e0;transition:background .15s}
+.btn:hover{background:#222}
+.btn.ok{border-color:#2d5a2d;color:#4caf50}
+.btn.ok:hover{background:#1a2e1a}
+.btn.bad{border-color:#5a2d2d;color:#f44336}
+.btn.bad:hover{background:#2e1a1a}
+.btn.sk{border-color:#5a4d2d;color:#ff9800}
+.btn.sk:hover{background:#2e2a1a}
+.btn:disabled{opacity:.4;cursor:default}
+.nav{display:flex;gap:8px}
+.fbar{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.fb{font-size:12px;padding:5px 12px;border-radius:6px;border:1px solid #2a2a2a;background:transparent;cursor:pointer;color:#888;transition:all .15s}
+.fb:hover{border-color:#444;color:#ccc}
+.fb.on{background:#222;border-color:#444;color:#fff}
+.exp{font-size:12px;padding:5px 12px;border-radius:6px;border:1px solid #1a4a7a;background:transparent;cursor:pointer;color:#4a9eff;margin-left:auto}
+.exp:hover{background:#0d2a4a}
+.empty{text-align:center;padding:3rem;color:#555;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>PROMPTS AUDIT — PROMPTS_LIBRARY_MASTER</h1>
+<div class="hdr">
+  <div class="prog" id="prog">0/137 revisados · 0%</div>
+  <div class="stats" id="stats"></div>
+</div>
+<div class="fbar" id="fbar"></div>
+<div id="main"></div>
+</div>
+
+<script>
+const P=[
+  {id:2,n:"Dad + Milk",a:"YES",cat:"Typography",fid:"1RaEV2W5F9Zl6LiTk2pXtvsNaUOvJWHbA",p:"Retro vintage: [NICHE_NAME] con expresión masculina fuerte, sunset rayas rojo/naranja/amarillo/teal. Texto arqueado arriba [DESIGN_WORD_1], curvo abajo [DESIGN_WORD_2].",st:"Masculine",su:"Animals",pt:"B"},
+  {id:5,n:"Social Club",a:"YES",cat:"Typography",fid:"12FDD15VB0z_60VEZ18JpCzknjGO5VaJu",p:"Monocromático nostálgico [NICHE_NAME] con crosshatch/engraving. Script+serif arriba, cursiva elegante abajo. Mini-labels a los lados.",st:"Feminine",su:"",pt:"L"},
+  {id:8,n:"Red White Blue",a:"YES",cat:"Typography",fid:"1ep1kh3eRPU8U92iHgKjeA0pItvdSwFf",p:"Tres [NICHE_NAME] kawaii/cartoon. Frase arriba y abajo en groovy font matching colors.",st:"Kids",su:"Patriotic",pt:"B"},
+  {id:10,n:"Siblings",a:"YES",cat:"Kids",fid:"1MSlmmD0P-KSuDa5_wsHAnVval67wSc7-",p:"Cartoon [NICHE_NAME] playful con ojos grandes. [DESIGN_WORD_1] arriba, [DESIGN_WORD_2] abajo en chunky distressed.",st:"Kids",su:"",pt:"B"},
+  {id:11,n:"Animal Coffee Sunset",a:"YES",cat:"Animals",fid:"1UXbSIpR3lPO3SBEAD1Qj0jyuxzBT6RFx",p:"Retro sunset: [NICHE_NAME] con aviator sunglasses tomando bebida iced. Rayas vintage. [DESIGN_WORD_1] arriba, [DESIGN_WORD_2] abajo.",st:"Vintage",su:"Animals",pt:"B"},
+  {id:13,n:"Spicy Food",a:"YES",cat:"Illustration",fid:"1Xaqm_S8EGSf9W4K7bRtP0SV4KF4q36n8",p:"Cuatro [NICHE_NAME] OBJECTS antropomórficos con expresiones únicas (shock, alegría, enojo, confusión).",st:"",su:"",pt:"B"},
+  {id:15,n:"Test Day",a:"YES",cat:"Typography",fid:"1eMtn8Km4ZSE37nNdN_VCidRcQjFSOKKL",p:"[NICHE_NAME] con oversized sunglasses, lápiz rosa y regla verde. Fondo checkered negro/beige con flores retro. Bubble letters groovy.",st:"Vintage, Groovy",su:"Animals",pt:"B"},
+  {id:16,n:"Dreamy Cat Rainbow",a:"YES",cat:"Floral",fid:"15_aM4SrN0h3wUOXrirb1_Jqn5eepmLBd",p:"Kawaii 2D flat [NICHE_NAME] en nube púrpura. Sparkles, corazones, mariposas. Gran arcoíris pastel.",st:"Feminine",su:"",pt:"B"},
+  {id:17,n:"Groovy Radiant",a:"NO",cat:"Typography",fid:"11CJgKW4BXvDbF-E5Rt3PDxxJbY9O3OR6",p:"Retro 70s psicodélico: [DESIGN_WORD] en bubble letters onduladas, gradiente coral a púrpura. Mano esquelética.",st:"Groovy",su:"",pt:"B"},
+  {id:18,n:"Flowery Test",a:"YES",cat:"Typography",fid:"1FVM5GgL5nF1bOSn0xV_2p1lY54GcFJS1",p:"[DESIGN_WORD] en chunky vintage serif. Florales coloridos creciendo a través de las letras. Grunge texture overlay.",st:"Feminine",su:"Floral",pt:"D"},
+  {id:19,n:"Vinyl Birth Year Vintage",a:"YES",cat:"Typography",fid:"1dVYfMd1n1ZYeawBwrm0Hx6YFL6hdeEOb",p:"NICHE-SPECIFIC OBJECT distressed con texto colorido [DESIGN_WORD_1] en fonts retro. Patrones rayados en rojo/amarillo/crema/teal.",st:"Vintage",su:"",pt:"B"},
+  {id:22,n:"Drip USA",a:"NO",cat:"Animals",fid:"10kFtGuCgKDOrXJGticOzUm6Ow4yO1mgo",p:"Pop-art: silueta catcher en cyan con dripping effects. Bandera americana de conos de waffle con ice cream rosado dripping.",st:"Kids",su:"Patriotic",pt:"L"},
+  {id:24,n:"Vintage Circular",a:"YES",cat:"Typography",fid:"1YX7nCvFrh0PVP14aqxouGxRaevkOMyqc",p:"Badge circular vintage de NICHE-SPECIFIC SCENE con [DESIGN_WORD] en distressed font, tonos tierra.",st:"Vintage",su:"",pt:"B"},
+  {id:25,n:"Zoo Animals",a:"NO",cat:"Typography",fid:"1hhPSMHp_H-ZtRfcPnaHFbKo4f4QLr32X",p:"Vintage pop-art [NICHE_NAME] con party hats y oversized glasses. [DESIGN_WORD] en bold retro serif naranja.",st:"Vintage, Kids",su:"Animals",pt:"B"},
+  {id:26,n:"Match Energy Boho",a:"YES",cat:"Typography",fid:"1EbrXJ1Qg4s58q0Z31vBRwj2NUaZ-Lz5P",p:"Retro boho: wildflowers dibujadas a mano en naranja/mostaza/verde bosque. Texto arriba y abajo.",st:"Vintage",su:"",pt:"B"},
+  {id:28,n:"Flowery Book",a:"YES",cat:"Floral",fid:"1sfCHlO199oUtLJxXq3II5Sxfq-TED0oe",p:"Pastel suave: NICHE-SPECIFIC SCENE con wildflowers y mariposas en rosa/coral/lavanda. Texto vintage arriba y abajo.",st:"Feminine",su:"Floral",pt:"B"},
+  {id:30,n:"Ramen Creature",a:"NO",cat:"Animals",fid:"1MUPYerKYQJcQi22mUvHu62K39V0nXMit",p:"Giant [NICHE_NAME] con ojos rojos comiendo noodles de bowl enorme con chopsticks. Sunset degradé rojo-naranja estilo japonés.",st:"Vintage",su:"",pt:"B"},
+  {id:31,n:"Psychedelic",a:"YES",cat:"Typography",fid:"1GGePeo1rQGwTHPt_iA3UM-6B1LjjYkn6",p:"Surreal gótico retro: calavera con hongos bioluminiscentes, flores rosas de cuencas oculares, llamas rojas/negras en espiral.",st:"Vintage",su:"",pt:"B"},
+  {id:32,n:"Mona Lisa",a:"YES",cat:"Art Styles",fid:"1TSt0xVKauR_p3n0cVME_tmgkOjk2wLgf",p:"Parodia pintura al óleo Renacimiento: [NICHE_NAME] CLASSIC PORTRAIT abrazando NICHE-SPECIFIC OBJECT. Tonos clásicos apagados.",st:"",su:"",pt:"B"},
+  {id:33,n:"Van Gogh",a:"YES",cat:"Animals",fid:"1MNRfc4feE10X4MGU1ZkSSofU5JnMstz-",p:"Van Gogh Starry Night: [NICHE_NAME] en brushstrokes expresivos gris/negro/blanco. Cielo estrellado azules/amarillos/teals.",st:"Van Gogh",su:"Animals",pt:"B"},
+  {id:34,n:"Japanese Ramen Poster",a:"NO",cat:"Animals",fid:"13UdO4fuEpXMJVxhudvvuZE82VzCpXX96",p:"Poster japonés vintage: [NICHE_NAME] con ramen bowl. Estilo ukiyo-e, olas del océano, cielo coral/beige. Kanji japonés.",st:"Vintage",su:"",pt:"B"},
+  {id:35,n:"Mid-Century",a:"YES",cat:"Animals",fid:"1l6KnJqE9dsTwnNflfr01Petx21U_Kf11",p:"Mid-century modern: [NICHE_NAME] en trajes coloridos, atomic-age starbursts, planetas, cohete retro. Font geométrica 1950s-60s.",st:"Vintage",su:"",pt:"B"},
+  {id:36,n:"250 Years of America",a:"YES",cat:"Typography",fid:"1hy_jDtFTx7bNyiutpXUFDlzmjoF8v71Q",p:"Bold vintage: [NICHE_NAME] con accesorios frente a backdrop distressed. Rojos/azules/blancos. [DESIGN_WORD] en serif patriótico.",st:"Vintage",su:"Patriotic",pt:"B"},
+  {id:38,n:"Book Girl Summer",a:"YES",cat:"Typography",fid:"1UrJauGa2uMJsG17s49vf8g_5e_YtARGd",p:"Retro 70s: [NICHE_NAME] recostado con NICHE-SPECIFIC OBJECT. [DESIGN_WORD] en bold groovy font. Naranja/tan/amarillo soleado.",st:"Groovy, Feminine",su:"",pt:"B"},
+  {id:40,n:"Retro Text",a:"YES",cat:"Typography",fid:"1XwQ1DRiYoLQJZTcXoYtNScqJVVSQXe4f",p:"[DESIGN_WORD] en 4 líneas con colores vintage: naranja quemado, crema desvanecida, teal azul, mostaza. Textura distressed.",st:"Vintage",su:"",pt:"B"},
+  {id:41,n:"Semiquincentennial",a:"YES",cat:"Typography",fid:"1NATG9n0TeWx5n-F_mv4NbBzNvgDy8VwG",p:"Vintage patriótico distressed: cuatro soldados silueta frente a bandera americana con textura grunge. Banner stencil.",st:"Vintage",su:"Patriotic",pt:"B"},
+  {id:43,n:"Floral Word Mesh",a:"YES",cat:"Typography",fid:"1ZDBXBm1yR94QCW6A-hChOYgyrPpFWKGk",p:"Retro floral block-style: poppies y daisies en naranja quemado/rojo profundo. Palabras integradas en serif vintage entre pétalos.",st:"Feminine, Groovy",su:"Floral",pt:"B"},
+  {id:44,n:"Our Flock Rocks",a:"YES",cat:"Typography",fid:"1kwRcLWt-_nW1PvUtS2ShmLOUPkIrZdit",p:"3 [NICHE_NAME] con black sunglasses y accesorios. Fondo 70s rayas en rojo/naranja/beige/turquosa. Texto bubbly retro.",st:"Vintage",su:"Animals",pt:"B"},
+  {id:45,n:"Max Flower Rainbows",a:"YES",cat:"Typography",fid:"1cuCi1Ug15nAxcpJozyfR3NwNOLhP-qJr",p:"Retro 70s: [DESIGN_WORD] en bubble letters rosadas/blancas. Groovy daisies/flores. Arcoíris vibrante en capas arriba.",st:"Groovy, Feminine",su:"",pt:"B"},
+  {id:46,n:"Neon Cyclist",a:"YES",cat:"Sports",fid:"1PLuV363Lb4aTbF_F1rn9eyasl3iLA-xI",p:"Dinámico [NICHE_NAME] en movimiento, bold neon gradient lines. Pose atlética con speed lines.",st:"Masculine",su:"",pt:"B"},
+  {id:47,n:"Guitar Bird",a:"YES",cat:"Floral",fid:"1ibBTciLTOQ4AUs-XsF-Y7HaGm_uuf-tS",p:"Vibrante: [NICHE_NAME] OBJECT en stained-glass mosaic colorido. Elementos florales jewel-toned.",st:"Feminine",su:"",pt:"B"},
+  {id:48,n:"Tie Dye Messy Bun",a:"YES",cat:"Kawaii",fid:"1yaVKPpSSmFTRYcD1xqLtefEMN8_ylaFC",p:"Silueta messy bun con lazo tie-dye arcoíris y heart-shaped sunglasses. Bold black linework, swirling colors.",st:"Feminine",su:"",pt:"B"},
+  {id:51,n:"Viking Runes",a:"NO",cat:"Animals",fid:"1ZrT29ipUivB8SsargiH2iL4uW1YOr6x6",p:"Norse mythology: máscara [NICHE_NAME] con runes en marco circular. [DESIGN_WORD] debajo en teal oscuro/beige/naranja.",st:"Masculine",su:"",pt:"B"},
+  {id:52,n:"Victory Over Japan Day",a:"YES",cat:"Typography",fid:"10eiTLjzQ0Jcm3JlT9XZLqv-bKKq6gbHq",p:"Badge patriótico vintage: [DESIGN_WORD] en emblema circular. [DESIGN_WORD_2] en retro script abajo. Military stencil.",st:"",su:"Patriotic",pt:"D"},
+  {id:53,n:"Sports Icon",a:"YES",cat:"Animals",fid:"1v6wUXtKQy3uNyY_n6C8rAbQ5d6LmNUKp",p:"Cute sporty: elementos NICHE-SPECIFIC SPORTS americanos (footballs, helmet, foam finger, popcorn, hot dog, red hearts).",st:"",su:"Sports",pt:""},
+  {id:54,n:"Tie Dye Leopard Print",a:"YES",cat:"Typography",fid:"178JxwwuvmZtnpeTQjDV8ZxVjHJUVktub",p:"[DESIGN_WORD] en chunky block letters rellenas con bright tie-dye y NICHE-SPECIFIC patterns. Outlined en bold black.",st:"Feminine, Groovy",su:"",pt:"B"},
+  {id:55,n:"Tattoos Are Trashy",a:"YES",cat:"Typography",fid:"13PRYdyar5MKbmNzuVBuU4hsrsQmDL44T",p:"Gótico: [DESIGN_WORD] en distressed old English font. Flores detalladas rodeadas de barbed wire. Deep red/forest green/bone white.",st:"Vintage",su:"",pt:"B"},
+  {id:56,n:"Bingo",a:"NO",cat:"Typography",fid:"16yV7NhJ_7V38HN-CJIxvBBCqXUtCS3Kx",p:"Vintage sunset: crowned NICHE-SPECIFIC GAME ball con [DESIGN_WORD] en distressed orange. Numbered balls de colores.",st:"Vintage",su:"",pt:"D"},
+  {id:64,n:"Strawberry Coquette",a:"YES",cat:"Typography",fid:"1AXHrvFgUYL9e8bB3sqV0Y7j7wzrn27Qz",p:"Watercolor: gran lazo en NICHE-SPECIFIC PATTERN, estilo sketch dibujado a mano. [DESIGN_WORD] en flowing script blanco abajo.",st:"Feminine",su:"",pt:"B"},
+  {id:66,n:"Floral Test",a:"YES",cat:"Typography",fid:"1UfAbLD-sOD_FFHDt-IKXe8-9FxfC9oFw",p:"Cheerful: [DESIGN_WORD] en letras pasteles con rounded serif. Jardín de flores dibujadas a mano arriba. Mariposas y sparkles.",st:"Feminine, Groovy",su:"Floral",pt:"B"},
+  {id:67,n:"Golincore Collection",a:"YES",cat:"Floral",fid:"1RIGOUGlldqCHDRKb5PfwoatURiyGqstf",p:"Místico: [NICHE_NAME] al centro, paneles collage con hongos/mariposas/wildflowers/estrellas/luna. Grid-style con divisores dorados.",st:"Feminine",su:"Animals",pt:"B"},
+  {id:68,n:"Forescore",a:"YES",cat:"Floral",fid:"1yv9-STwO7UmB49yBK_VaW2olMZsVmXhO",p:"Woodland: [NICHE_NAME] sentado entre wildflowers y hojas. Texturas suaves, rosa cálido/verde apagado/tonos tierra.",st:"Feminine",su:"Animals",pt:"B"},
+  {id:69,n:"Tarot Card",a:"YES",cat:"Floral",fid:"1gcsaeYdKauxGmsZZFUYzvpjLGTFewyTN",p:"Tarot card místico: [NICHE_NAME] femenino con floral bun sosteniendo dos velas brillantes. Teal/crema/rose/gold.",st:"Feminine, Vintage",su:"",pt:"B"},
+  {id:72,n:"Dab Raccoon",a:"YES",cat:"Typography",fid:"1XaRd08ShRW97xwRg3EW4Ggd5SCGrgsCx",p:"Cartoon [NICHE_NAME] en confident dab pose con streetwear colorido. Paleta neon. [DESIGN_WORD] en chunky rainbow block letters.",st:"Vintage",su:"Animals",pt:"B"},
+  {id:73,n:"Cowgirl",a:"YES",cat:"Typography",fid:"1p23g9QoWwvVbfJ8ZwvsdLkGESewHfBJI",p:"Cowgirl confiada frente a montañas del desierto. Camisa verde menta, boots, gran sol dorado.",st:"Feminine, Vintage",su:"",pt:""},
+  {id:75,n:"Nana Ribbon",a:"YES",cat:"Floral",fid:"17ey2XOeB-iVf_M2imRx74sE6UZi9gX9C",p:"Vintage: [DESIGN_WORD] en letras fabric-patch, cada una con patrón pastel diferente. Efecto applique cosido. Lazo lavanda en base.",st:"Feminine, Vintage, Groovy",su:"",pt:"B"},
+  {id:76,n:"Coffee Skeleton",a:"YES",cat:"Typography",fid:"18ndPUanweCHuS-h9PFY39SHO8DM-0JFW",p:"[NICHE_NAME] sonriente sosteniendo NICHE-SPECIFIC OBJECT humeante. Square border con star accents. [DESIGN_WORD] vintage arriba.",st:"Vintage",su:"",pt:"D"},
+  {id:77,n:"Cherry Mouth",a:"YES",cat:"Typography",fid:"1D2wCTklcaM4Zb2W7R-mNy8npb0SddmuO",p:"Bold retro: labios rojos brillantes con NICHE-SPECIFIC OBJECT. [DESIGN_WORD] en stylish cursive script abajo.",st:"Groovy, Feminine",su:"",pt:"D"},
+  {id:81,n:"Resting Beach Face",a:"YES",cat:"Typography",fid:"1LQegTtGToLIIirad5vGBg8JYW1CUeaGf",p:"[NICHE_NAME] con cola ombré turquesa, pelo aqua, sombrero de paja. Lounging en flamingo pool float con cóctel tropical.",st:"Groovy, Feminine",su:"Animals",pt:"B"},
+  {id:82,n:"Four Vertical Slats",a:"YES",cat:"Typography",fid:"1h4jedeyh6Z637W1B3VpeDaqvZ1Fd3Q2A",p:"4 paneles verticales slats, travel poster mid-century de [NICHE_NAME] scene. Hot pink block letters abajo, aqua text.",st:"Vintage",su:"",pt:"B"},
+  {id:83,n:"Meow-garita",a:"YES",cat:"Typography",fid:"1ggrmcgw5ACVOy43Rqz5JDWH05Dq1QhkN",p:"Cute cartoon [NICHE_NAME] junto a NICHE-SPECIFIC OBJECT. Texto playful arriba y abajo. Plus signs y dots esparcidos.",st:"Kids, Feminine",su:"Animals",pt:"L"},
+  {id:85,n:"Heart Surgery",a:"YES",cat:"Typography",fid:"1EeZxnsPoDzo0FSEKfVCHMn8Thihz-jFe",p:"Blanco y negro: texto distressed grande. NICHE-SPECIFIC OBJECT con corazón anatómico rojo. Línea EKG negra.",st:"Masculine",su:"",pt:"D"},
+  {id:88,n:"Flowery Boombox",a:"YES",cat:"Floral",fid:"1fccjvjgPA2RvFNFjHHx99sAi2zeeimpL",p:"Boombox vintage rosado con bouquet de wildflowers brotando de speakers. Estilo sketch, mustard/sage/dusty rose.",st:"Vintage",su:"Floral",pt:"D"},
+  {id:89,n:"Sun Phase",a:"YES",cat:"Typography",fid:"15MGSLqi0N7MRIWKHvDbOWT1awJBUmGUX",p:"Retro boho: NICHE-SPECIFIC OBJECT sereno con cara tranquila, rayos, estrellas, arcoíris pasteles. Terracota/mustard/sage.",st:"Groovy",su:"",pt:"B"},
+  {id:91,n:"Desert UFO",a:"YES",cat:"Animals",fid:"1Jgk9L563s0XMhZyHCqvUNTLG1pG7KopY",p:"Vintage: [NICHE_NAME] recostado en silla plegable en desierto. Sombrero vaquero, cacti, luna llena, UFO volando. Monochrome navy.",st:"Vintage",su:"Animals",pt:"L"},
+  {id:93,n:"Nature Happy Place",a:"YES",cat:"Typography",fid:"1BS8JUZrM-sc9t8VhHJwI9unmMIllfvve",p:"Cottagecore: cute [NICHE_NAME] en pradera de wildflowers bajo arcoíris con mariposas. [DESIGN_WORD] en curly serif.",st:"Groovy",su:"Animals",pt:"B"},
+  {id:94,n:"Evil Eye",a:"YES",cat:"Animals",fid:"1EmSKfX7V9FL_T49mbuMTmzBXr2b1rsvu",p:"Diseño intrincado evil eye en azul/blanco. Gran evil eye central rodeado por más pequeños en patrón simétrico tipo árbol.",st:"Groovy",su:"",pt:"B"},
+  {id:95,n:"Berry Back To School",a:"YES",cat:"Typography",fid:"1FeUlj6f0u0Ohc1zdQBrSVq1hy4y8qVS7",p:"Back-to-school: messy buns con lazos en NICHE-SPECIFIC PATTERN. Sunglasses reflejando diseño vibrante. Hearts, stars, icons.",st:"Feminine, Kids",su:"",pt:"L"},
+  {id:96,n:"1st Grade Unicorn",a:"YES",cat:"Typography",fid:"1XNy-Ww73L4bbwRMkj6F5Sp2OwtPHFYar",p:"[NICHE_NAME] con rainbow mane y tail sobre arcoíris multicolor. Estrellas y sparkles. Texto playful en colores múltiples.",st:"Groovy, Kids",su:"",pt:"B"},
+  {id:97,n:"Hello X Back To School",a:"YES",cat:"Typography",fid:"1xhjqQK6bZe18qEfCigfPSxgDzYMqtB9M",p:"Back-to-school: texto en rainbow tie-dye script. NICHE-SPECIFIC FLOWERS y mariposas al fondo. Tres líneas de texto stacked.",st:"Groovy, Kids, Feminine",su:"Floral",pt:"B"},
+  {id:98,n:"Back To School",a:"YES",cat:"Typography",fid:"15XzRxB5ugkoE0NyYbY1qnR08OXRj01Wk",p:"Playful back-to-school: cartoon [NICHE_NAME] con brazos y red sneakers. Texto energético: azul-teal, lime green 3D, chunky purple.",st:"Groovy, Kids",su:"Sports",pt:"B"},
+  {id:101,n:"Morbidly A Beast",a:"YES",cat:"Typography",fid:"1Xu7T8bL7klmW46vN36LZuM-gNYr5Lfwd",p:"Dark-fantasy: demonio [NICHE_NAME] con dos puños en gauntlets. Lettering battle-scarred. Negros volcánicos/rojos sangre.",st:"Bootleg, Masculine",su:"",pt:"B"},
+  {id:103,n:"Pun Shirts",a:"YES",cat:"Typography",fid:"1uMaX1LMC9AlbYkNOxRzPLMKE2PFJ3aPq",p:"Vintage sunset: [NICHE_NAME] recostado con ojos caídos y NICHE-SPECIFIC OBJECT. [DESIGN_WORD] en bold retro arqueado.",st:"Masculine",su:"Animals",pt:"L"},
+  {id:104,n:"Today I Feel",a:"YES",cat:"Typography",fid:"1mnXI5AdAd_ncO-CC6jHCXKmmBwqn5c8_",p:"[DESIGN_WORD] en bubble lettering arriba. Nueve cute cartoon [NICHE_NAME] en grid 3x3 con emoción diferente cada uno.",st:"",su:"Animals",pt:"D"},
+  {id:105,n:"Dog Beach Summer",a:"YES",cat:"Typography",fid:"1BM-DsFqKZpOvHTVS_-8Y4mRu1geNrjJ0",p:"Vintage sunset: [NICHE_NAME] con sunglasses en NICHE-SPECIFIC SCENE. [DESIGN_WORD] en retro bold groovy, naranja/teal/rosa.",st:"Groovy",su:"Animals",pt:"B"},
+  {id:108,n:"Boy Who Loves Planes",a:"YES",cat:"Typography",fid:"1qfdcp5bmB1e2IW5DW3s6peDzFZouuHws",p:"Retro bold vintage: NICHE-SPECIFIC OBJECT volando sobre sunset-striped en rojo/naranja/amarillo/teal. Cartoon-style smoke trailing.",st:"",su:"",pt:"B"},
+  {id:111,n:"Miniatures",a:"YES",cat:"Typography",fid:"1m2zAhFzW6I1ygci51_tgbWcevSFuSuiP",p:"Degradé sunset vintage. 4 estrellas + texto. Tres figuras fantasía: warrior, hooded figure, elf warrior. Black/white sketch.",st:"",su:"",pt:"B"},
+  {id:112,n:"Motorhome Camping",a:"YES",cat:"Typography",fid:"1452VfaKk8MWUi0kOQi8OonH5tb74SrAL",p:"Simplistic 2D retro: [NICHE_NAME] OBJECT con rooftop storage. Pinos frente a gran sol naranja con rayas. Dos pájaros.",st:"",su:"",pt:"B"},
+  {id:116,n:"Breast Cancer Awareness",a:"YES",cat:"Typography",fid:"1m02BC2rS33lIlWBVlXfDxZZlO89jDlLw",p:"5 paneles verticales con ilustraciones [NICHE_NAME] en NICHE-SPECIFIC COLORS con texturas glitter/watercolor.",st:"Feminine",su:"Sports, Floral",pt:"B"},
+  {id:117,n:"Neurodiversity",a:"YES",cat:"Typography",fid:"1bNUB7BXtMrSA9RbV4V9-X90BJw64E8Oa",p:"Whimsical: [NICHE_NAME] CHARACTERS rodeados de NICHE-SPECIFIC OBJECTS en estilo dibujado a mano, pasteles cálidos. Rainbow stripes.",st:"Groovy, Feminine",su:"",pt:"B"},
+  {id:122,n:"Vintage Botanical",a:"YES",cat:"Typography",fid:"1d4bJohflKV67-z1L7PUtEyP-BYcoxq34",p:"Grabado botánico vintage: libro antiguo con helechos y rosa floreciendo. Estrellas. Serif clásico arqueado. Monochrome black-ink.",st:"",su:"",pt:"L"},
+  {id:124,n:"Floral Flag",a:"YES",cat:"Floral",fid:"1WIqK_ooRpZ-X0D9KBXdYNwfhIs2O5hq4",p:"Watercolor [NICHE_NAME] con brushstroke textures. Decorado con vibrant NICHE-SPECIFIC FLOWERS. [DESIGN_WORD] en cursiva abajo.",st:"",su:"Patriotic, Floral",pt:"L"},
+  {id:126,n:"Dachschund Flowers Book",a:"YES",cat:"Floral",fid:"1lJKZJLYOXCMvmt9TRuD4SlW1kfr-l30X",p:"Whimsical: silueta [NICHE_NAME] dentro de NICHE-SPECIFIC OBJECT, wildflowers brotando del cuerpo. Mariposas, abejas, pájaros.",st:"",su:"",pt:"B"},
+  {id:127,n:"Halloween Stamps",a:"YES",cat:"Typography",fid:"1itHUFRy14NHJgMmwGTLKF6_XhINXic5Y",p:"Cute vintage Halloween: 6 postage stamp frames con zombie, [NICHE_NAME] con maracas, vampiro, werewolf, haunted tree, candy corn.",st:"",su:"",pt:"B"},
+  {id:128,n:"Football Season",a:"YES",cat:"Typography",fid:"1anyNc-AvGl9lMRhtxmXYkeT1a75slEIw",p:"Distressed vintage: bold [NICHE_NAME] OBJECT con scuffed texture. [DESIGN_WORD] en bold retro varsity. Stars y sparkles, beige/grey.",st:"",su:"Sports",pt:"L"},
+  {id:129,n:"Cruisin",a:"YES",cat:"Typography",fid:"1hFJ3MieSWwYeOYsN2sUxvcBTN6H7OGEQ",p:"Retro travel: [NICHE_NAME] SCENE en capas de cool blue y blanco. [DESIGN_WORD] en bold playful vintage font con swashes.",st:"",su:"Patriotic",pt:"B"},
+  {id:131,n:"Back To School Cat",a:"YES",cat:"Typography",fid:"1Pdq8QPiHb-KqDOVAktdtbp2Nxpotdz8m",p:"Retro vintage sunset: [NICHE_NAME] con oversized orange glasses, expresión ansiosa. Circular sunset con rayas naranja/amarillo/teal.",st:"",su:"Animals",pt:"B"},
+  {id:132,n:"Gold Drip Baseball",a:"YES",cat:"Sports",fid:"1JJEjgDC4OQ6iMsWUGsjjXkkMo6gmx49z",p:"Digital art: personaje NICHE-SPECIFIC SPORTS dorado que se derrite en cartoon style. Gorra dorada, sneakers dorados, liquid melting.",st:"",su:"",pt:"B"},
+  {id:133,n:"Back To School Jam",a:"YES",cat:"Typography",fid:"1SNO1Yw82vEbRAbvIp-T5cDm8ULqkgmML",p:"Grid 3x3 de [NICHE_NAME] OBJECTS. Texto en white cursive arriba y abajo. Estilo minimalista, dos colores alternados. Retro vintage.",st:"Groovy, Kids",su:"",pt:"B"},
+  {id:135,n:"Hello Grade",a:"YES",cat:"Typography",fid:"1mYlV6BzfTA8-0zcTJNYasoI0ppnubAGj",p:"[DESIGN_WORD] en white cursive con NICHE-SPECIFIC PATTERN overlay. NICHE-SPECIFIC OBJECT shiny arriba. Hearts, stars, icons.",st:"Kids",su:"",pt:"D"},
+  {id:136,n:"Pre Kindergarten",a:"YES",cat:"Typography",fid:"10kBdGDj6l--ncV-Rc1qlMNmiMDtZ63ev",p:"Cartoon [NICHE_NAME] grinning con dientes oversized, sunglasses, mordiendo NICHE-SPECIFIC OBJECT. Yellow stars y sparkles.",st:"Kids",su:"",pt:"D"},
+  {id:138,n:"Retro Woman With Cat",a:"YES",cat:"Typography",fid:"1zS8Yflu-Unk6DMZnu0MILq18YCFbH18f",p:"Estilo 1950s: [NICHE_NAME] sosteniendo NICHE-SPECIFIC OBJECT, ambos sonriendo ampliamente. [DESIGN_WORD] en all-caps retro font.",st:"",su:"Animals",pt:"L"},
+  {id:141,n:"Class of 2026 Sports",a:"YES",cat:"Typography",fid:"1llYtvq_ii8uHk8_wi1NSiOZVdHgjFEmq",p:"Bold varsity-style [DESIGN_WORD] en block letters blancas. NICHE-SPECIFIC LETTER reemplazada por NICHE-SPECIFIC OBJECT realista.",st:"",su:"Sports",pt:"D"},
+  {id:142,n:"Class of 2026 Toile Bow",a:"YES",cat:"Typography",fid:"1ZywZW6PIJ3o7vUigesmnoDr-hq_Z8gZn",p:"Decorativo [DESIGN_WORD] con NICHE-SPECIFIC COLORS/white patterns. Letras con quilted/stitched texture. Aesthetic pastel, capas.",st:"",su:"",pt:"D"},
+  {id:143,n:"Capybara Retro Illustration",a:"YES",cat:"Typography",fid:"1IlDOK-NVmyxynDZ1OEQ3zCeGMD-gcMSD",p:"Vintage engraving-style [NICHE_NAME] comiendo NICHE-SPECIFIC OBJECT, linework detallado, expresión humorística. Monochrome forest green.",st:"",su:"Animals",pt:"L"},
+  {id:144,n:"Ain't No Family Floral",a:"YES",cat:"Typography",fid:"1R5dMr9hQOQc18ekG1WrCBeAS11LzXzAo",p:"Retro floral: daisy-style flowers en paleta 70s. Composición vertical simétrica. [DESIGN_WORD] en bold vintage serif naranja apagado.",st:"Groovy",su:"",pt:"B"},
+  {id:145,n:"Fruity Friends Social Club",a:"YES",cat:"Typography",fid:"1VHGhFxj-UFm2qpkYkD4QagZdWg_Whz9Q",p:"Dos [NICHE_NAME] CHARACTERS animados en NICHE-SPECIFIC ACTION. White stars. Tres líneas de texto stacked.",st:"",su:"",pt:"B"},
+  {id:146,n:"Girl Chicken",a:"YES",cat:"Typography",fid:"1WgZxM3Dk40oqHcm9D_RNzeH7Bgcb97xF",p:"Kawaii cartoon [NICHE_NAME] con big sparkling eyes, rosy cheeks. Flores coloridas, hearts, leaf accents en pasteles.",st:"Feminine",su:"Animals",pt:"D"},
+  {id:147,n:"Beach",a:"YES",cat:"Typography",fid:"16crZyQl5FArpww89BTmYM1pL6ChNjdTg",p:"Retro sunset circular con rayas cálidas naranja/crema/turquosa. NICHE-SPECIFIC ELEMENTS silueta. Texto vintage y soft cursive.",st:"",su:"",pt:"B"},
+  {id:149,n:"Skeleton Funny",a:"YES",cat:"Typography",fid:"1cM_faevtnzqvA_9_l4KCwFnxgDcWoIwS",p:"Vintage: [NICHE_NAME] sosteniendo NICHE-SPECIFIC OBJECT, grinning. Gradient circular distressed. [DESIGN_WORD] en retro lettering.",st:"",su:"",pt:"B"},
+  {id:150,n:"Mexican USA Eagles",a:"YES",cat:"Sci-Fi",fid:"1YS1Y02qv-ShxcMBTpsZh14MUWYho-TU_",p:"Dos [NICHE_NAME] majestuosos enfrentándose mid-air, alas dramáticamente abiertas. Plumas tipo ribbon entrelazándose.",st:"",su:"Patriotic",pt:"B"},
+  {id:151,n:"Weenie The People 250 Years",a:"YES",cat:"Typography",fid:"1ZyVVzrHAOk8mt5g6nrMdgxBg_gKvLFB-",p:"Patriótico: silueta [NICHE_NAME] hecha de bandera americana, perfil lateral, cuerpo bajo/largo. Estrellas patrióticas.",st:"",su:"Animals, Patriotic",pt:"D"},
+  {id:152,n:"Boating Captain",a:"YES",cat:"Typography",fid:"12En9nGaLNtaZxF7BAcvsAa0a6C9-YAiA",p:"Retro vintage: capitán motorboat con barba, fumando pipa, sunglasses. [DESIGN_WORD] en old fashioned serif stencil bold.",st:"",su:"",pt:"D"},
+  {id:154,n:"Cappucinno Assassino",a:"YES",cat:"Typography",fid:"1M6XUxFI0I9Wqp3SV6efhKlue1iLnRsBy",p:"Angry cappuccino cup character como ninja assassin. Dos curved katanas. Arms y legs, orange sneakers, battle stance. Lightning bolts.",st:"Bootleg",su:"",pt:"B"},
+  {id:155,n:"Ocean",a:"YES",cat:"Typography",fid:"1m7QCKWI7hUThRk_YTLExiGOb9Ktxw2WG",p:"Playful retro: [DESIGN_WORD_1] en bold chunky hand-drawn typography. [NICHE_NAME] estilizado mid-jump con curved water lines. Solid teal.",st:"Groovy",su:"Animals",pt:"L"},
+  {id:157,n:"Dog Dad Beer",a:"YES",cat:"Typography",fid:"16GF3eiycgH3wNAapeyBwkg2vRuFHvIOR",p:"[NICHE_NAME] con aviator sunglasses sosteniendo frothy mug. Vintage sunset background con rayas distressed. Texto arqueado con paw prints.",st:"",su:"Animals",pt:"D"},
+  {id:158,n:"Kitten Boba",a:"YES",cat:"Kawaii",fid:"1nyaUMQv9vdzpAzyYrnSVAFbSWfWybm2O",p:"Kawaii [NICHE_NAME] abrazando cup de NICHE-SPECIFIC DRINK verde con black tapioca pearls. Ojos cerrados, mejillas rosadas.",st:"",su:"",pt:"B"},
+  {id:159,n:"S'mores",a:"YES",cat:"Typography",fid:"1Jm7laGtc5tlGsxXU27NDpXwOzevc2rpX",p:"Retro camping: s'more sobre fuego bajo cielo estrellado con árboles y montañas. [DESIGN_WORD] en distressed text, earth tones.",st:"",su:"",pt:"B"},
+  {id:160,n:"Pineapple Dabbing",a:"YES",cat:"Retro",fid:"16Qbl5yJbBGFRsYRNjhGJDnuNl4YPEyJl",p:"Bold playful [NICHE_NAME] mid-dab, oversized sunglasses, yellow sneakers. Spiky green leaves. Grunge American flag en yellow/black.",st:"",su:"",pt:"B"},
+  {id:161,n:"Pickles",a:"YES",cat:"Animals",fid:"1EPQu31oOJ3ULH6g9nUkiRJGV59-ocWBn",p:"Cartoon [NICHE_NAME] sosteniendo giant jar of NICHE-SPECIFIC OBJECTS. Fur marrón/tan, ojos expresivos, boca abierta panicked.",st:"",su:"",pt:"L"},
+  {id:163,n:"Boo Haw",a:"YES",cat:"Typography",fid:"1jjlg3t_P6XqiGPnMt78rSywCQWKJyPcf",p:"Western Halloween: [NICHE_NAME] en cow print sheet negro, cowboy hat. Bright yellow sunflowers y bats. [DESIGN_WORD] en yellow font.",st:"",su:"Animals",pt:"B"},
+  {id:164,n:"Fall Themed Test",a:"YES",cat:"Typography",fid:"1sDRuYVI-NJjme6cZf0vMVhOle1JdG-ZI",p:"Fall-themed [DESIGN_WORD] en letras bold patterned: leopard print, gingham, fall leaves, stars. Large plaid bow. Warm brown/orange/cream.",st:"Groovy, Feminine",su:"",pt:"B"},
+  {id:167,n:"Pumpkin Spice",a:"YES",cat:"Typography",fid:"1oAtpvWarNcsHdmbozj9fBWSw0iL_wq7_",p:"Halloween: [NICHE_NAME] con pumpkin. Badge circular vintage. Texto en capas. Maple leaves. Orange-brown circular border.",st:"",su:"",pt:"B"},
+  {id:168,n:"Best-Tea",a:"YES",cat:"Typography",fid:"1XuKHIbK5-lrC7UOW3wR7TpWa4oUlJ9dW",p:"Retro: dos cute smiling tea cups dentro de badge circular. Pun [DESIGN_WORD_1] en curved vintage font arriba/abajo.",st:"",su:"",pt:"D"},
+  {id:169,n:"Morning Ritual",a:"YES",cat:"Typography",fid:"1yEtthz43qFxawpkC24b1i1JDRlMbGPH6",p:"Minimalista blanco y negro: [NICHE_NAME] gateando hacia cup de NICHE-SPECIFIC DRINK. [DESIGN_WORD] en all caps clean bold.",st:"",su:"",pt:"L"},
+  {id:172,n:"Tea Birthday",a:"YES",cat:"Typography",fid:"1r0N_DIkZJbiu8rhWmoGxBOw3O-Mhq_L7",p:"Kawaii beige tea cup con smiling face, tongue out, orange tea. Hand-drawn flowers framing. [DESIGN_WORD] en cursive arriba.",st:"",su:"",pt:"L"},
+  {id:173,n:"Camping",a:"YES",cat:"Typography",fid:"1rP6PPhyFWfBuf3T2wSPJkbJOWZeR_Ggm",p:"Vintage-style [NICHE_NAME] OBJECT en mint green y cream. Rounded retro design, peach door, dark blue windows. Triangle bunting.",st:"",su:"",pt:"L"},
+  {id:174,n:"Surfing Japanese",a:"YES",cat:"Floral",fid:"1QFFcGWlNBeNFvzEoWiLcjvkypfly5INO",p:"Japonés-inspired: [NICHE_NAME] surfeando en dramatic ocean wave. Bold retro sun, orange-red sky. Kanji vertical, palm trees, hibiscus.",st:"",su:"",pt:"B"},
+  {id:175,n:"Driving You Insane",a:"YES",cat:"Illustration",fid:"1ez0EafPSZI_zw91ISuvpWZhyMxmgdsNt",p:"Blanco y negro: [NICHE_NAME] manejando small car, sketchy hand-drawn con cross-hatching. Happy grinning, closed eyes. Texto bold arriba.",st:"Meme",su:"Animals",pt:"L"},
+  {id:179,n:"Raccoon Coffee",a:"YES",cat:"Typography",fid:"1NLnc2uo0h8ppcasVBQOeAKDGBOx8csYp",p:"Sarcástico: [NICHE_NAME] con dark grey fur y narrowed yellow eyes, sosteniendo steaming mug. Retro horizontal stripes background.",st:"",su:"Animals",pt:"L"},
+  {id:181,n:"Oktoberfest",a:"YES",cat:"Typography",fid:"11mf4BqrpVp-C5TcGkBT8Y4VJAGf9QUxs",p:"Vintage cartoon: drunk [NICHE_NAME] en red German alpine hat, sosteniendo dos frothy mugs. Detrás de gray jail bars. Dark background.",st:"",su:"",pt:"B"},
+  {id:183,n:"Work Forecast",a:"YES",cat:"Typography",fid:"1jedBlm0XGYA0aRi6PeiwnL0z-QKQqeeN",p:"Humorístico: pie chart dibujado a mano. Mayoría burnt orange, pequeña porción yellow. [DESIGN_WORD] en bold playful all-caps arriba.",st:"",su:"",pt:"L"},
+  {id:184,n:"Rainbow Themed Forecast",a:"YES",cat:"Typography",fid:"1iZCNQ55OGwSdsqxMNmfr-808q54nelE2",p:"Playful boho-style rainbow en terracota/mustard/muted teal con dots/dashes/hearts patterns. Texto curved arriba y abajo.",st:"Groovy, Feminine",su:"",pt:"L"},
+  {id:186,n:"Postcard",a:"YES",cat:"Floral",fid:"1dWVdEVfcj2Ui1PmMu-pcN6DNyahbft6A",p:"Autumn: [NICHE_NAME] en large [DESIGN_WORD] styled como vintage postage stamp. Orange fall flowers, foliage, warm yellow sun.",st:"",su:"",pt:"B"},
+  {id:187,n:"Grandma's Buddy",a:"YES",cat:"Typography",fid:"1fVQvLmfl_hlLQVNulSzYdOFO4FB5ABLo",p:"Cute cartoon girl en gardening gear sosteniendo shovel y potted flower. Pastel checkerboard background, smiling daisies y veggie icons.",st:"Kids",su:"",pt:"D"},
+  {id:188,n:"Autumn Pugs",a:"YES",cat:"Floral",fid:"1Y5U-MD6qcTCRziEDXClx3BYqjWj3Nx2U",p:"4 [NICHE_NAME] cada uno en cuadro con floral silhouettes. Autumnal prints en naranja/mustard/crema. Floral motifs en dark silhouettes.",st:"",su:"Animals",pt:"B"},
+  {id:191,n:"Old Man Sunset",a:"YES",cat:"Typography",fid:"1GcJrSDIiIy_kIhKCbuviYDa_n4ertMFu",p:"Retro vintage sunset: line-drawn [NICHE_NAME] OBJECT centrado contra half-circle con rayas horizontales retro. Lightning bolt icons.",st:"",su:"",pt:"B"},
+  {id:193,n:"Electric Bikes",a:"YES",cat:"Retro",fid:"1HsASzYKWMkuv2TNPy7sbu3yz_FmJ76RR",p:"Humorístico: [NICHE_NAME] OBJECT al centro, detailed vintage sketch con thick lines. [DESIGN_WORD_1] en distressed cream text arriba y abajo.",st:"",su:"",pt:"D"},
+  {id:194,n:"Cross Country Running",a:"YES",cat:"Typography",fid:"1CmhO0qlJt5RzDyNrA0uNHdfb9hwGae5b",p:"Bold motivacional: texto en arched/stacked layout. [DESIGN_WORD_2] en burnt orange. [DESIGN_WORD] en capitals con arrow through it.",st:"",su:"Sports",pt:"B"},
+  {id:198,n:"Lobotomy Monochrome",a:"YES",cat:"Typography",fid:"1n7BBtVhqYssv7Y6VNvHFzJcTmJlP6Osi",p:"Vintage hand-drawn monochrome brown ink: [NICHE_NAME] leaping inside circular frame. Crescent moons flanking, twinkling stars.",st:"",su:"Animals",pt:"L"},
+  {id:199,n:"Ramen Capybara Sunset",a:"YES",cat:"Animals",fid:"10c8GOECAw0lJu-Bi92gsmLKR3kTqRinl",p:"Kawaii [NICHE_NAME] comiendo noodles de giant bowl con chopsticks. Rosy cheeks, closed eyes. Bold retro sunset en hot pink/naranja/amarillo.",st:"",su:"Animals",pt:"B"},
+  {id:200,n:"My Favorite Sport",a:"YES",cat:"Typography",fid:"1Pw3m0ThjdtgDXOL9vs0ftAvC_vS0VLfh",p:"Vintage cartoon gray tabby [NICHE_NAME] upright, turquoise tank top, rainbow headband. Sosteniendo múltiples potted houseplants.",st:"",su:"Animals, Sports",pt:"L"},
+  {id:202,n:"Cause Kerfuffle",a:"YES",cat:"Typography",fid:"1FxtiYIyg8f0ljctjgNRyMAz5heC7Dqui",p:"Humorístico: [NICHE_NAME] montando vintage bicycle, sketchy monochromatic style. Confident expression. Sparkles y stars.",st:"",su:"Animals",pt:"L"},
+  {id:203,n:"Football Bow",a:"YES",cat:"Typography",fid:"1ESURrNvLqI72WQiuYHmKx5WgUc0-JPnj",p:"Pink-themed: gran NICHE-SPECIFIC OBJECT bow con white stitching. Floating sparkles. [DESIGN_WORD] en bold bubbly pink/white.",st:"Groovy, Feminine",su:"Sports",pt:"B"},
+  {id:208,n:"Animal Capybara",a:"YES",cat:"Kawaii",fid:"112qn6IbKEdTaxcF1aj8GFKApmf8iPNLL",p:"Whimsical: cute cartoon [NICHE_NAME] emergiendo de unzipped zipper opening. Head y front paws peeking through con expresión curiosa.",st:"",su:"",pt:"B"},
+  {id:210,n:"Dabbing Nugget Japanese",a:"YES",cat:"Retro",fid:"1GCGWnMxqbuUm3NEPVfD7zoPnhSRkVPRR",p:"Retro Japanese pop art: cartoon chicken nugget surfeando massive teal wave. Wide smile, winking eye. Vintage orange background, red sun.",st:"",su:"",pt:"B"},
+  {id:211,n:"Halloween Cereal Killer",a:"YES",cat:"Animals",fid:"18LzgLNLu2l0CCmqVU0WC1Bz8zd6cbG0j",p:"Spooky: cartoonish grim reaper con glowing eyes sosteniendo bowl de colorful cereal. Bats, jack-o-lantern, pine trees, crescent moon.",st:"",su:"",pt:"B"},
+  {id:215,n:"Sigma Boy",a:"YES",cat:"Animals",fid:"17wLaSxt9j9FXQiwGKG07r4JM5mTgWN76",p:"Kawaii chubby penguin styled as sushi: orange salmon on head, belly como sushi roll en seaweed. SIGMA BOY en bold cream block letters.",st:"",su:"Animals",pt:"B"},
+  {id:216,n:"Possum Radicalized",a:"YES",cat:"Typography",fid:"1TZYyq8tnYdFqy8NY3uxH8wgDNXb-9jiX",p:"Bold edgy: [NICHE_NAME] con blue sunglasses, llamas rodeando cara y yellow lightning bolts. Bright pink tongue, mischievous expression.",st:"",su:"",pt:"B"},
+  {id:217,n:"Feral Western",a:"YES",cat:"Animals",fid:"1pv7KXOMUhf5wuOq3hR7HTIZ8aT_rUlJJ",p:"Vintage western: [NICHE_NAME] en cowboy hat/bandana, montando galloping horse por el desierto. Cacti, rocky mesas. Dusty pink/tan.",st:"",su:"Animals",pt:"D"},
+  {id:221,n:"Girls Trip",a:"YES",cat:"Typography",fid:"1oX7UDMi9M83_0fTnnZNnXCVEHYSXcuaE",p:"Fun tropical: bold hot pink ink, palm trees, cocktail glass, tropical drink con whipped cream. Sparkles y starfish. Beach party vibe.",st:"Feminine",su:"",pt:"B"},
+  {id:222,n:"Shipwreck",a:"YES",cat:"Typography",fid:"1Yi6nvpHNf9Rllg1rZPo_o9khlMeNGsEH",p:"Vintage distressed navy blue: rugged bearded sea captain con pipe y captain hat. Detailed sketch linework, ornate nautical flourishes.",st:"",su:"",pt:"B"},
+  {id:223,n:"Skull Cherries",a:"YES",cat:"Gothic",fid:"1JIAIxNT9kwCqmkejy_2CdhbG36wg-v4e",p:"Dos glossy red skulls fusionados con cherry stems. Cracked surfaces. Large satin bow en black-to-charcoal gradient. Small bats volando.",st:"",su:"",pt:"B"},
+  {id:224,n:"X Makes Me Say Bad Words",a:"YES",cat:"Typography",fid:"1DUcCt5_vvh_Ad8GBorHGmwFA093PGj4A",p:"Retro square layout: texto en burnt orange/beige/cream. Crossed golf clubs con dimpled golf ball. 4 horizontal retro sunset stripes.",st:"Groovy",su:"Sports",pt:"B"},
+  {id:225,n:"Postal Stamps Grid",a:"YES",cat:"Floral",fid:"1rxPV8cfX6kMcc0WZ_HSjwYU3-7118cVf",p:"Pastel grid 3x2 de whimsical postage stamps, cada uno con diferente escena magica. Soft kawaii, washed vintage texture.",st:"",su:"",pt:"B"},
+  {id:226,n:"Cute Pattern + Bow",a:"YES",cat:"Typography",fid:"1ceGoeWvOazI1Z-i6zldG7olJfm-rDRio",p:"Soft pastel stitched applique: [DESIGN_WORD_1] en large puffy letters, cada una con unique fabric pattern. Light blue bow debajo.",st:"",su:"",pt:"B"},
+  {id:227,n:"F-Caw-F",a:"YES",cat:"Typography",fid:"1cFJ7aE19t5R78hvwJC2etIdRxxiCuxgO",p:"Bold: black crow on branch, blooming yellow daisies y leafy foliage. Distressed black checkerboard backdrop. Grungy hand-drawn all-caps.",st:"",su:"",pt:"B"}
+];
+
+const votes={};
+const edits={};
+let cur=0,filter='pending';
+
+function imgUrl(fid){return 'https://drive.google.com/thumbnail?id='+fid+'&sz=w500';}
+function getList(){
+  if(filter==='all') return P;
+  if(filter==='pending') return P.filter(p=>!votes[p.id]);
+  if(filter==='ok') return P.filter(p=>votes[p.id]==='ok');
+  if(filter==='bad') return P.filter(p=>votes[p.id]==='bad');
+  if(filter==='skip') return P.filter(p=>votes[p.id]==='skip');
+  return P;
+}
+function counts(){
+  const ok=Object.values(votes).filter(v=>v==='ok').length;
+  const bad=Object.values(votes).filter(v=>v==='bad').length;
+  const sk=Object.values(votes).filter(v=>v==='skip').length;
+  return{ok,bad,sk,pending:P.length-ok-bad-sk,total:P.length};
+}
+function saveEdit(field,val){
+  const L=getList();const p=L[cur];if(!p)return;
+  if(!edits[p.id])edits[p.id]={};
+  edits[p.id][field]=val;
+}
+function vote(v){
+  const L=getList();const p=L[cur];if(!p)return;
+  if(edits[p.id]){
+    if(edits[p.id].st!==undefined)p.st=edits[p.id].st;
+    if(edits[p.id].su!==undefined)p.su=edits[p.id].su;
+    if(edits[p.id].pt!==undefined)p.pt=edits[p.id].pt;
+  }
+  votes[p.id]=v;
+  const nL=getList();
+  if(cur>=nL.length)cur=Math.max(0,nL.length-1);
+  render();
+}
+function setFilter(f){filter=f;cur=0;render();}
+function exportResults(){
+  const bad=P.filter(p=>votes[p.id]==='bad');
+  const lines=bad.map(p=>'ID '+p.id+' | '+p.n+' ('+p.a+')\nhttps://drive.google.com/file/d/'+p.fid+'/view').join('\n\n');
+  const blob=new Blob(['Prompts que NO coinciden con su imagen ('+bad.length+'):\n\n'+lines],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='no_coinciden.txt';
+  a.click();
+}
+function render(){
+  const c=counts();
+  const L=getList();
+  const done=c.ok+c.bad+c.sk;
+  const pct=Math.round((done/c.total)*100);
+  document.getElementById('prog').textContent=done+'/'+c.total+' revisados · '+pct+'%';
+  document.getElementById('stats').innerHTML=
+    '<span class="stat ok">✓ '+c.ok+'</span>'+
+    '<span class="stat bad">✗ '+c.bad+'</span>'+
+    '<span class="stat sk">→ '+c.sk+'</span>'+
+    '<span class="stat">'+c.pending+' pendientes</span>';
+  document.getElementById('fbar').innerHTML=
+    '<button class="fb '+(filter==='pending'?'on':'')+'" onclick="setFilter(\'pending\')">Pendientes ('+c.pending+')</button>'+
+    '<button class="fb '+(filter==='all'?'on':'')+'" onclick="setFilter(\'all\')">Todos</button>'+
+    '<button class="fb '+(filter==='bad'?'on':'')+'" onclick="setFilter(\'bad\')">No coinciden ('+c.bad+')</button>'+
+    '<button class="fb '+(filter==='ok'?'on':'')+'" onclick="setFilter(\'ok\')">OK ('+c.ok+')</button>'+
+    (done>0?'<button class="exp" onclick="exportResults()">↓ Exportar</button>':'');
+  if(L.length===0){
+    document.getElementById('main').innerHTML='<div class="empty">Sin prompts en este filtro.</div>';
+    return;
+  }
+  if(cur>=L.length)cur=0;
+  const p=L[cur];
+  const e=edits[p.id]||{};
+  const st=e.st!==undefined?e.st:p.st;
+  const su=e.su!==undefined?e.su:p.su;
+  const pt=e.pt!==undefined?e.pt:p.pt;
+  const ptOpts=['','D','L','B','D+L','D+B','L+B','D+L+B'].map(v=>'<option value="'+v+'"'+(pt===v?' selected':'')+'>'+( v||'—')+'</option>').join('');
+  document.getElementById('main').innerHTML=`
+<div class="card">
+  <div class="chdr">
+    <div>
+      <div class="pname">ID ${p.id} — ${p.n}</div>
+      <div class="meta">
+        <span class="bdg ${p.a==='YES'?'yes':'no'}">${p.a==='YES'?'ACTIVE':'INACTIVE'}</span>
+        <span class="bdg">${p.cat}</span>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#555;">${cur+1} / ${L.length}</div>
+  </div>
+  <div class="grid">
+    <div>
+      <div class="lbl">Imagen de referencia</div>
+      <div class="ibox" id="ib">
+        <img src="${imgUrl(p.fid)}" alt="Prompt ${p.id}"
+          onload="document.getElementById('ib').style.minHeight='auto'"
+          onerror="document.getElementById('ib').innerHTML='<div class=\\'noimg\\'>No cargó<br><a href=\\'https://drive.google.com/file/d/${p.fid}/view\\' target=\\'_blank\\'>Abrir en Drive →</a></div>'" />
+      </div>
+    </div>
+    <div>
+      <div class="lbl">Prompt</div>
+      <div class="ptext">${p.p}</div>
+    </div>
+  </div>
+  <div class="fields">
+    <div class="field">
+      <label>Style</label>
+      <input type="text" value="${st}" oninput="saveEdit('st',this.value)" placeholder="ej. Vintage, Feminine" />
+    </div>
+    <div class="field">
+      <label>Subject</label>
+      <input type="text" value="${su}" oninput="saveEdit('su',this.value)" placeholder="ej. Animals, Floral" />
+    </div>
+    <div class="field">
+      <label>Printing type</label>
+      <select onchange="saveEdit('pt',this.value)">${ptOpts}</select>
+    </div>
+  </div>
+  <div class="acts">
+    <button class="btn ok" onclick="vote('ok')">✓ Coincide</button>
+    <button class="btn bad" onclick="vote('bad')">✗ No coincide</button>
+    <button class="btn sk" onclick="vote('skip')">→ Skip</button>
+  </div>
+  <div class="nav">
+    <button class="btn" onclick="if(cur>0){cur--;render();}" ${cur===0?'disabled':''} style="flex:0.4;font-size:12px;">← Anterior</button>
+    <button class="btn" onclick="if(cur<getList().length-1){cur++;render();}" ${cur===L.length-1?'disabled':''} style="flex:0.4;font-size:12px;">Siguiente →</button>
+  </div>
+</div>`;
+}
+render();
+</script>
+</body>
+</html>
