@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompts Ingest — MerchByMJ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  :root {
+    --bg: #1a1a1a;
+    --surface: #242424;
+    --surface2: #2e2e2e;
+    --border: #3a3a3a;
+    --accent: #e8c547;
+    --accent2: #7ec8a4;
+    --text: #f0f0f0;
+    --text2: #999;
+    --danger: #e06c75;
+    --radius: 8px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 11px;
+    color: var(--text2);
+  }
+
+  .badge.live { color: var(--accent2); border-color: var(--accent2); }
+
+  header .actions { margin-left: auto; display: flex; gap: 8px; }
+
+  .btn {
+    padding: 7px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+  .btn.primary:hover { background: #f5d55a; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Progress bar */
+  .progress-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+  .progress-label { color: var(--text2); font-size: 11px; white-space: nowrap; }
+
+  /* Upload zone */
+  #upload-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 57px);
+    gap: 16px;
+    padding: 40px;
+  }
+
+  .drop-area {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 60px 80px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    max-width: 480px;
+    width: 100%;
+  }
+  .drop-area:hover, .drop-area.drag { border-color: var(--accent); background: rgba(232,197,71,0.04); }
+  .drop-area .icon { font-size: 40px; margin-bottom: 12px; }
+  .drop-area h2 { font-size: 15px; margin-bottom: 6px; }
+  .drop-area p { color: var(--text2); font-size: 12px; }
+  #file-input { display: none; }
+
+  /* Main layout */
+  #main { display: none; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    min-height: calc(100vh - 100px);
+  }
+
+  /* Card list */
+  .card-list {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .prompt-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.15s;
+    cursor: pointer;
+  }
+  .prompt-card:hover { border-color: #555; }
+  .prompt-card.active { border-color: var(--accent); }
+  .prompt-card.done { border-color: var(--accent2); }
+  .prompt-card.done .card-status { background: var(--accent2); color: #000; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-num {
+    font-size: 11px;
+    color: var(--text2);
+    min-width: 28px;
+  }
+  .card-id {
+    font-weight: 600;
+    color: var(--accent);
+    font-size: 12px;
+  }
+  .card-name {
+    flex: 1;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-status {
+    font-size: 10px;
+    background: var(--surface2);
+    border-radius: 3px;
+    padding: 2px 6px;
+    color: var(--text2);
+  }
+  .card-tags {
+    display: flex;
+    gap: 6px;
+    padding: 8px 14px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+  .tag.style { color: #c792ea; border-color: #c792ea44; }
+  .tag.subject { color: #89ddff; border-color: #89ddff44; }
+  .tag.printing { color: var(--accent); border-color: var(--accent)44; }
+
+  /* Side panel */
+  .side-panel {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    position: sticky;
+    top: 100px;
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text2);
+    font-size: 12px;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .panel-content { display: none; flex-direction: column; gap: 0; }
+  .panel-content.visible { display: flex; }
+
+  .panel-img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: contain;
+    background: #111;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-img-placeholder {
+    width: 100%;
+    aspect-ratio: 1;
+    background: #111;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text2);
+    font-size: 11px;
+  }
+
+  .panel-fields { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+  .field label {
+    display: block;
+    font-size: 10px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+  }
+
+  .field input, .field select, .field textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 7px 10px;
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .field textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.5;
+  }
+
+  .field select option { background: var(--surface2); }
+
+  .printing-group {
+    display: flex;
+    gap: 6px;
+  }
+  .printing-btn {
+    flex: 1;
+    padding: 7px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .printing-btn.active-D { background: #2d4a7a; border-color: #4a7ac8; color: #89ddff; }
+  .printing-btn.active-L { background: #4a2d7a; border-color: #7a4ac8; color: #c792ea; }
+  .printing-btn.active-B { background: #2d4a2d; border-color: #4ac84a; color: var(--accent2); }
+
+  .panel-actions {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  /* Export panel */
+  #export-zone {
+    display: none;
+    padding: 40px 24px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  #export-zone h2 { color: var(--accent); margin-bottom: 20px; }
+  #export-zone pre {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    overflow-x: auto;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--accent2);
+    margin-bottom: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--accent2);
+    color: #000;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 12px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.2s;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  .img-url-input {
+    font-size: 10px !important;
+    color: var(--text2) !important;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Prompts Ingest</h1>
+  <span class="badge">MerchByMJ</span>
+  <span class="badge live" id="counter-badge">0 prompts</span>
+  <div class="actions">
+    <button class="btn" id="btn-reset" onclick="resetAll()" style="display:none">↩ Reset</button>
+    <button class="btn primary" id="btn-export" onclick="exportCSV()" style="display:none">Export CSV</button>
+  </div>
+</header>
+
+<div id="progress-bar" class="progress-bar" style="display:none">
+  <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <span class="progress-label" id="progress-label">0 / 0 done</span>
+</div>
+
+<!-- Upload zone -->
+<div id="upload-zone">
+  <div class="drop-area" id="drop-area" onclick="document.getElementById('file-input').click()"
+       ondragover="event.preventDefault();this.classList.add('drag')"
+       ondragleave="this.classList.remove('drag')"
+       ondrop="handleDrop(event)">
+    <div class="icon">📋</div>
+    <h2>Load Prompt Data</h2>
+    <p>Drop the CSV exported from Claude here<br>or click to browse</p>
+  </div>
+  <input type="file" id="file-input" accept=".csv" onchange="loadCSV(this.files[0])">
+  <p style="color:var(--text2);font-size:11px;text-align:center">
+    Paste Claude's CSV output → export from chat → load here
+  </p>
+</div>
+
+<!-- Main review area -->
+<div id="main">
+  <div class="layout">
+    <div class="card-list" id="card-list"></div>
+    <div class="side-panel" id="side-panel">
+      <div class="panel-empty" id="panel-empty">← Select a prompt to review</div>
+      <div class="panel-content" id="panel-content">
+        <div id="panel-img-wrap"></div>
+        <div class="panel-fields">
+          <div class="field">
+            <label>Prompt ID</label>
+            <input type="text" id="f-id" readonly>
+          </div>
+          <div class="field">
+            <label>Style Name</label>
+            <input type="text" id="f-name">
+          </div>
+          <div class="field">
+            <label>Style</label>
+            <select id="f-style">
+              <option>Groovy</option>
+              <option>Vintage</option>
+              <option>Masculine</option>
+              <option>Feminine</option>
+              <option>Groovy/Feminine</option>
+              <option>Kids</option>
+              <option>Bootleg</option>
+              <option>Van Gogh</option>
+              <option>Meme</option>
+              <option>Kawaii</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Subject</label>
+            <input type="text" id="f-subject" placeholder="Animals, Floral, Patriotic, Sports...">
+          </div>
+          <div class="field">
+            <label>Category</label>
+            <input type="text" id="f-category" placeholder="Typography, Animals, Floral...">
+          </div>
+          <div class="field">
+            <label>Printing Type</label>
+            <div class="printing-group">
+              <div class="printing-btn" id="btn-D" onclick="setPrinting('D')">D</div>
+              <div class="printing-btn" id="btn-L" onclick="setPrinting('L')">L</div>
+              <div class="printing-btn" id="btn-B" onclick="setPrinting('B')">B</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Prompt</label>
+            <textarea id="f-prompt"></textarea>
+          </div>
+          <div class="field">
+            <label>Image URL (Drive)</label>
+            <input type="text" id="f-image-url" class="img-url-input" placeholder="https://drive.google.com/uc?export=view&id=...">
+          </div>
+        </div>
+        <div class="panel-actions">
+          <button class="btn" id="btn-prev" onclick="navigate(-1)">← Prev</button>
+          <button class="btn primary" style="flex:1" onclick="saveAndNext()">Save & Next →</button>
+          <button class="btn" id="btn-next" onclick="navigate(1)">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let prompts = [];
+let currentIdx = -1;
+let printing = '';
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-area').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) loadCSV(file);
+}
+
+function loadCSV(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target.result;
+    parseCSV(text);
+  };
+  reader.readAsText(file);
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = parseCSVLine(lines[0]);
+  
+  prompts = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const vals = parseCSVLine(lines[i]);
+    const row = {};
+    headers.forEach((h, idx) => row[h.trim()] = (vals[idx] || '').trim());
+    row._done = false;
+    prompts.push(row);
+  }
+  
+  if (prompts.length === 0) { alert('No prompts found in CSV'); return; }
+  
+  document.getElementById('upload-zone').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+  document.getElementById('btn-reset').style.display = '';
+  document.getElementById('btn-export').style.display = '';
+  document.getElementById('progress-bar').style.display = '';
+  document.getElementById('counter-badge').textContent = prompts.length + ' prompts';
+  
+  renderCards();
+  selectPrompt(0);
+  updateProgress();
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i+1] === '"') { current += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+function renderCards() {
+  const list = document.getElementById('card-list');
+  list.innerHTML = '';
+  prompts.forEach((p, i) => {
+    const style = p.STYLE || p.style || '';
+    const subject = p.SUBJECT || p.subject || '';
+    const pt = p.PRINTING_TYPE || p.printing_type || '';
+    const name = p.STYLE_NAME || p.style_name || '';
+    const id = p.PROMPT_ID || p.prompt_id || '';
+    
+    const card = document.createElement('div');
+    card.className = 'prompt-card' + (p._done ? ' done' : '');
+    card.id = 'card-' + i;
+    card.onclick = () => selectPrompt(i);
+    card.innerHTML = `
+      <div class="card-header">
+        <span class="card-num">${i+1}.</span>
+        <span class="card-id">#${id}</span>
+        <span class="card-name">${name}</span>
+        <span class="card-status">${p._done ? '✓ done' : 'pending'}</span>
+      </div>
+      <div class="card-tags">
+        ${style ? `<span class="tag style">${style}</span>` : ''}
+        ${subject ? `<span class="tag subject">${subject}</span>` : ''}
+        ${pt ? `<span class="tag printing">${pt}</span>` : ''}
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function selectPrompt(idx) {
+  if (idx < 0 || idx >= prompts.length) return;
+  
+  // Deselect previous
+  if (currentIdx >= 0) {
+    document.getElementById('card-' + currentIdx)?.classList.remove('active');
+  }
+  
+  currentIdx = idx;
+  const p = prompts[idx];
+  
+  document.getElementById('card-' + idx)?.classList.add('active');
+  document.getElementById('card-' + idx)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  
+  document.getElementById('panel-empty').style.display = 'none';
+  document.getElementById('panel-content').classList.add('visible');
+  
+  // Fill fields
+  document.getElementById('f-id').value = p.PROMPT_ID || p.prompt_id || '';
+  document.getElementById('f-name').value = p.STYLE_NAME || p.style_name || '';
+  document.getElementById('f-style').value = p.STYLE || p.style || 'Vintage';
+  document.getElementById('f-subject').value = p.SUBJECT || p.subject || '';
+  document.getElementById('f-category').value = p.CATEGORY || p.category || '';
+  document.getElementById('f-prompt').value = p.PROMPT || p.prompt || '';
+  document.getElementById('f-image-url').value = p.IMAGE_URL || p.image_url || '';
+  
+  // Printing type
+  printing = p.PRINTING_TYPE || p.printing_type || '';
+  updatePrintingBtns();
+  
+  // Image
+  const imgWrap = document.getElementById('panel-img-wrap');
+  const imageUrl = p.IMAGE_URL || p.image_url || '';
+  if (imageUrl) {
+    // Convert to thumbnail for display
+    const fileId = imageUrl.match(/id=([^&]+)/)?.[1];
+    const thumbUrl = fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w300` : imageUrl;
+    imgWrap.innerHTML = `<img class="panel-img" src="${thumbUrl}" onerror="this.parentElement.innerHTML='<div class=panel-img-placeholder>No preview</div>'">`;
+  } else {
+    imgWrap.innerHTML = `<div class="panel-img-placeholder">No image URL</div>`;
+  }
+  
+  // Nav buttons
+  document.getElementById('btn-prev').disabled = idx === 0;
+  document.getElementById('btn-next').disabled = idx === prompts.length - 1;
+}
+
+function setPrinting(val) {
+  printing = printing === val ? '' : val;
+  updatePrintingBtns();
+}
+
+function updatePrintingBtns() {
+  ['D','L','B'].forEach(v => {
+    const btn = document.getElementById('btn-' + v);
+    btn.className = 'printing-btn' + (printing === v ? ' active-' + v : '');
+  });
+}
+
+function saveAndNext() {
+  saveCurrentFields();
+  prompts[currentIdx]._done = true;
+  
+  // Update card
+  const card = document.getElementById('card-' + currentIdx);
+  card?.classList.add('done');
+  card?.classList.remove('active');
+  const status = card?.querySelector('.card-status');
+  if (status) status.textContent = '✓ done';
+  
+  updateProgress();
+  showToast('Saved #' + (prompts[currentIdx].PROMPT_ID || currentIdx + 1));
+  
+  if (currentIdx < prompts.length - 1) {
+    selectPrompt(currentIdx + 1);
+  }
+}
+
+function navigate(dir) {
+  saveCurrentFields();
+  selectPrompt(currentIdx + dir);
+}
+
+function saveCurrentFields() {
+  if (currentIdx < 0) return;
+  const p = prompts[currentIdx];
+  p.STYLE_NAME = document.getElementById('f-name').value;
+  p.STYLE = document.getElementById('f-style').value;
+  p.SUBJECT = document.getElementById('f-subject').value;
+  p.CATEGORY = document.getElementById('f-category').value;
+  p.PRINTING_TYPE = printing;
+  p.PROMPT = document.getElementById('f-prompt').value;
+  p.IMAGE_URL = document.getElementById('f-image-url').value;
+  
+  // Update card tags
+  const card = document.getElementById('card-' + currentIdx);
+  if (card) {
+    const tags = card.querySelector('.card-tags');
+    tags.innerHTML = `
+      ${p.STYLE ? `<span class="tag style">${p.STYLE}</span>` : ''}
+      ${p.SUBJECT ? `<span class="tag subject">${p.SUBJECT}</span>` : ''}
+      ${p.PRINTING_TYPE ? `<span class="tag printing">${p.PRINTING_TYPE}</span>` : ''}
+    `;
+  }
+}
+
+function updateProgress() {
+  const done = prompts.filter(p => p._done).length;
+  const total = prompts.length;
+  const pct = total ? (done / total * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = done + ' / ' + total + ' done';
+}
+
+function exportCSV() {
+  saveCurrentFields();
+  
+  const headers = ['PROMPT_ID','STYLE_NAME','CATEGORY','STYLE','SUBJECT','PRINTING_TYPE','PROMPT','IMAGE_URL'];
+  const rows = [headers.join(',')];
+  
+  prompts.forEach(p => {
+    const row = headers.map(h => {
+      const val = String(p[h] || '');
+      return '"' + val.replace(/"/g, '""') + '"';
+    });
+    rows.push(row.join(','));
+  });
+  
+  const csv = rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'prompts_ingest_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV exported!');
+}
+
+function resetAll() {
+  if (!confirm('Reset everything?')) return;
+  prompts = [];
+  currentIdx = -1;
+  document.getElementById('upload-zone').style.display = '';
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('btn-reset').style.display = 'none';
+  document.getElementById('btn-export').style.display = 'none';
+  document.getElementById('progress-bar').style.display = 'none';
+  document.getElementById('counter-badge').textContent = '0 prompts';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>
