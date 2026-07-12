@@ -34,9 +34,9 @@ h1{font-size:18px;font-weight:500;margin-bottom:1rem;color:#fff}
 .fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem}
 @media(max-width:500px){.fields{grid-template-columns:1fr}}
 .field label{font-size:11px;color:#555;display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
-.field input,.field select{width:100%;font-size:13px;padding:7px 10px;border-radius:6px;border:1px solid #2a2a2a;background:#111;color:#e0e0e0;outline:none}
-.field input:focus,.field select:focus{border-color:#444}
-.field select option{background:#1a1a1a}
+.field select{width:100%;font-size:13px;padding:7px 10px;border-radius:6px;border:1px solid #2a2a2a;background:#111;color:#e0e0e0;outline:none;cursor:pointer}
+.field select:focus{border-color:#444}
+.field select option{background:#1a1a1a;color:#e0e0e0}
 .acts{display:flex;gap:8px;margin-bottom:8px}
 .btn{flex:1;padding:10px;border-radius:6px;border:1px solid #333;background:transparent;font-size:13px;font-weight:500;cursor:pointer;color:#e0e0e0;transition:background .15s}
 .btn:hover{background:#222}
@@ -69,6 +69,9 @@ h1{font-size:18px;font-weight:500;margin-bottom:1rem;color:#fff}
 </div>
 
 <script>
+const STYLES=['','Bootleg','Feminine','Groovy','Groovy, Feminine','Kids','Kids, Feminine','Masculine','Meme','Van Gogh','Vintage','Vintage, Groovy','Vintage, Kids','Bootleg, Masculine','Groovy, Kids','Groovy, Kids, Feminine','Feminine, Groovy','Feminine, Vintage','Feminine, Vintage, Groovy','Vintage, Feminine, Groovy'];
+const SUBJECTS=['','Animals','Animals, Patriotic','Animals, Sports','Floral','Floral, Patriotic','Patriotic','Patriotic, Floral','Sports','Sports, Floral'];
+
 const P=[
   {id:2,n:"Dad + Milk",a:"YES",cat:"Typography",fid:"1RaEV2W5F9Zl6LiTk2pXtvsNaUOvJWHbA",p:"Retro vintage: [NICHE_NAME] con expresión masculina fuerte, sunset rayas rojo/naranja/amarillo/teal. Texto arqueado arriba [DESIGN_WORD_1], curvo abajo [DESIGN_WORD_2].",st:"Masculine",su:"Animals",pt:"B"},
   {id:5,n:"Social Club",a:"YES",cat:"Typography",fid:"12FDD15VB0z_60VEZ18JpCzknjGO5VaJu",p:"Monocromático nostálgico [NICHE_NAME] con crosshatch/engraving. Script+serif arriba, cursiva elegante abajo. Mini-labels a los lados.",st:"Feminine",su:"",pt:"L"},
@@ -127,7 +130,7 @@ const P=[
   {id:91,n:"Desert UFO",a:"YES",cat:"Animals",fid:"1Jgk9L563s0XMhZyHCqvUNTLG1pG7KopY",p:"Vintage: [NICHE_NAME] recostado en silla plegable en desierto. Sombrero vaquero, cacti, luna llena, UFO volando. Monochrome navy.",st:"Vintage",su:"Animals",pt:"L"},
   {id:93,n:"Nature Happy Place",a:"YES",cat:"Typography",fid:"1BS8JUZrM-sc9t8VhHJwI9unmMIllfvve",p:"Cottagecore: cute [NICHE_NAME] en pradera de wildflowers bajo arcoíris con mariposas. [DESIGN_WORD] en curly serif.",st:"Groovy",su:"Animals",pt:"B"},
   {id:94,n:"Evil Eye",a:"YES",cat:"Animals",fid:"1EmSKfX7V9FL_T49mbuMTmzBXr2b1rsvu",p:"Diseño intrincado evil eye en azul/blanco. Gran evil eye central rodeado por más pequeños en patrón simétrico tipo árbol.",st:"Groovy",su:"",pt:"B"},
-  {id:95,n:"Berry Back To School",a:"YES",cat:"Typography",fid:"1FeUlj6f0u0Ohc1zdQBrSVq1hy4y8qVS7",p:"Back-to-school: messy buns con lazos en NICHE-SPECIFIC PATTERN. Sunglasses reflejando diseño vibrante. Hearts, stars, icons.",st:"Feminine, Kids",su:"",pt:"L"},
+  {id:95,n:"Berry Back To School",a:"YES",cat:"Typography",fid:"1FeUlj6f0u0Ohc1zdQBrSVq1hy4y8qVS7",p:"Back-to-school: messy buns con lazos en NICHE-SPECIFIC PATTERN. Sunglasses reflejando diseño vibrante. Hearts, stars, icons.",st:"Feminine, Groovy",su:"",pt:"L"},
   {id:96,n:"1st Grade Unicorn",a:"YES",cat:"Typography",fid:"1XNy-Ww73L4bbwRMkj6F5Sp2OwtPHFYar",p:"[NICHE_NAME] con rainbow mane y tail sobre arcoíris multicolor. Estrellas y sparkles. Texto playful en colores múltiples.",st:"Groovy, Kids",su:"",pt:"B"},
   {id:97,n:"Hello X Back To School",a:"YES",cat:"Typography",fid:"1xhjqQK6bZe18qEfCigfPSxgDzYMqtB9M",p:"Back-to-school: texto en rainbow tie-dye script. NICHE-SPECIFIC FLOWERS y mariposas al fondo. Tres líneas de texto stacked.",st:"Groovy, Kids, Feminine",su:"Floral",pt:"B"},
   {id:98,n:"Back To School",a:"YES",cat:"Typography",fid:"15XzRxB5ugkoE0NyYbY1qnR08OXRj01Wk",p:"Playful back-to-school: cartoon [NICHE_NAME] con brazos y red sneakers. Texto energético: azul-teal, lime green 3D, chunky purple.",st:"Groovy, Kids",su:"Sports",pt:"B"},
@@ -180,8 +183,8 @@ const P=[
   {id:174,n:"Surfing Japanese",a:"YES",cat:"Floral",fid:"1QFFcGWlNBeNFvzEoWiLcjvkypfly5INO",p:"Japonés-inspired: [NICHE_NAME] surfeando en dramatic ocean wave. Bold retro sun, orange-red sky. Kanji vertical, palm trees, hibiscus.",st:"",su:"",pt:"B"},
   {id:175,n:"Driving You Insane",a:"YES",cat:"Illustration",fid:"1ez0EafPSZI_zw91ISuvpWZhyMxmgdsNt",p:"Blanco y negro: [NICHE_NAME] manejando small car, sketchy hand-drawn con cross-hatching. Happy grinning, closed eyes. Texto bold arriba.",st:"Meme",su:"Animals",pt:"L"},
   {id:179,n:"Raccoon Coffee",a:"YES",cat:"Typography",fid:"1NLnc2uo0h8ppcasVBQOeAKDGBOx8csYp",p:"Sarcástico: [NICHE_NAME] con dark grey fur y narrowed yellow eyes, sosteniendo steaming mug. Retro horizontal stripes background.",st:"",su:"Animals",pt:"L"},
-  {id:181,n:"Oktoberfest",a:"YES",cat:"Typography",fid:"11mf4BqrpVp-C5TcGkBT8Y4VJAGf9QUxs",p:"Vintage cartoon: drunk [NICHE_NAME] en red German alpine hat, sosteniendo dos frothy mugs. Detrás de gray jail bars. Dark background.",st:"",su:"",pt:"B"},
-  {id:183,n:"Work Forecast",a:"YES",cat:"Typography",fid:"1jedBlm0XGYA0aRi6PeiwnL0z-QKQqeeN",p:"Humorístico: pie chart dibujado a mano. Mayoría burnt orange, pequeña porción yellow. [DESIGN_WORD] en bold playful all-caps arriba.",st:"",su:"",pt:"L"},
+  {id:181,n:"Oktoberfest",a:"YES",cat:"Typography",fid:"11mf4BqrpVp-C5TcGkBT8Y4VJAGf9QUxs",p:"Vintage cartoon: drunk [NICHE_NAME] en red German alpine hat, sosteniendo dos frothy mugs. Detras de gray jail bars. Dark background.",st:"",su:"",pt:"B"},
+  {id:183,n:"Work Forecast",a:"YES",cat:"Typography",fid:"1jedBlm0XGYA0aRi6PeiwnL0z-QKQqeeN",p:"Humorístico: pie chart dibujado a mano. Mayoria burnt orange, pequeña porcion yellow. [DESIGN_WORD] en bold playful all-caps arriba.",st:"",su:"",pt:"L"},
   {id:184,n:"Rainbow Themed Forecast",a:"YES",cat:"Typography",fid:"1iZCNQ55OGwSdsqxMNmfr-808q54nelE2",p:"Playful boho-style rainbow en terracota/mustard/muted teal con dots/dashes/hearts patterns. Texto curved arriba y abajo.",st:"Groovy, Feminine",su:"",pt:"L"},
   {id:186,n:"Postcard",a:"YES",cat:"Floral",fid:"1dWVdEVfcj2Ui1PmMu-pcN6DNyahbft6A",p:"Autumn: [NICHE_NAME] en large [DESIGN_WORD] styled como vintage postage stamp. Orange fall flowers, foliage, warm yellow sun.",st:"",su:"",pt:"B"},
   {id:187,n:"Grandma's Buddy",a:"YES",cat:"Typography",fid:"1fVQvLmfl_hlLQVNulSzYdOFO4FB5ABLo",p:"Cute cartoon girl en gardening gear sosteniendo shovel y potted flower. Pastel checkerboard background, smiling daisies y veggie icons.",st:"Kids",su:"",pt:"D"},
@@ -191,10 +194,10 @@ const P=[
   {id:194,n:"Cross Country Running",a:"YES",cat:"Typography",fid:"1CmhO0qlJt5RzDyNrA0uNHdfb9hwGae5b",p:"Bold motivacional: texto en arched/stacked layout. [DESIGN_WORD_2] en burnt orange. [DESIGN_WORD] en capitals con arrow through it.",st:"",su:"Sports",pt:"B"},
   {id:198,n:"Lobotomy Monochrome",a:"YES",cat:"Typography",fid:"1n7BBtVhqYssv7Y6VNvHFzJcTmJlP6Osi",p:"Vintage hand-drawn monochrome brown ink: [NICHE_NAME] leaping inside circular frame. Crescent moons flanking, twinkling stars.",st:"",su:"Animals",pt:"L"},
   {id:199,n:"Ramen Capybara Sunset",a:"YES",cat:"Animals",fid:"10c8GOECAw0lJu-Bi92gsmLKR3kTqRinl",p:"Kawaii [NICHE_NAME] comiendo noodles de giant bowl con chopsticks. Rosy cheeks, closed eyes. Bold retro sunset en hot pink/naranja/amarillo.",st:"",su:"Animals",pt:"B"},
-  {id:200,n:"My Favorite Sport",a:"YES",cat:"Typography",fid:"1Pw3m0ThjdtgDXOL9vs0ftAvC_vS0VLfh",p:"Vintage cartoon gray tabby [NICHE_NAME] upright, turquoise tank top, rainbow headband. Sosteniendo múltiples potted houseplants.",st:"",su:"Animals, Sports",pt:"L"},
-  {id:202,n:"Cause Kerfuffle",a:"YES",cat:"Typography",fid:"1FxtiYIyg8f0ljctjgNRyMAz5heC7Dqui",p:"Humorístico: [NICHE_NAME] montando vintage bicycle, sketchy monochromatic style. Confident expression. Sparkles y stars.",st:"",su:"Animals",pt:"L"},
+  {id:200,n:"My Favorite Sport",a:"YES",cat:"Typography",fid:"1Pw3m0ThjdtgDXOL9vs0ftAvC_vS0VLfh",p:"Vintage cartoon gray tabby [NICHE_NAME] upright, turquoise tank top, rainbow headband. Sosteniendo multiples potted houseplants.",st:"",su:"Animals, Sports",pt:"L"},
+  {id:202,n:"Cause Kerfuffle",a:"YES",cat:"Typography",fid:"1FxtiYIyg8f0ljctjgNRyMAz5heC7Dqui",p:"Humoristico: [NICHE_NAME] montando vintage bicycle, sketchy monochromatic style. Confident expression. Sparkles y stars.",st:"",su:"Animals",pt:"L"},
   {id:203,n:"Football Bow",a:"YES",cat:"Typography",fid:"1ESURrNvLqI72WQiuYHmKx5WgUc0-JPnj",p:"Pink-themed: gran NICHE-SPECIFIC OBJECT bow con white stitching. Floating sparkles. [DESIGN_WORD] en bold bubbly pink/white.",st:"Groovy, Feminine",su:"Sports",pt:"B"},
-  {id:208,n:"Animal Capybara",a:"YES",cat:"Kawaii",fid:"112qn6IbKEdTaxcF1aj8GFKApmf8iPNLL",p:"Whimsical: cute cartoon [NICHE_NAME] emergiendo de unzipped zipper opening. Head y front paws peeking through con expresión curiosa.",st:"",su:"",pt:"B"},
+  {id:208,n:"Animal Capybara",a:"YES",cat:"Kawaii",fid:"112qn6IbKEdTaxcF1aj8GFKApmf8iPNLL",p:"Whimsical: cute cartoon [NICHE_NAME] emergiendo de unzipped zipper opening. Head y front paws peeking through con expresion curiosa.",st:"",su:"",pt:"B"},
   {id:210,n:"Dabbing Nugget Japanese",a:"YES",cat:"Retro",fid:"1GCGWnMxqbuUm3NEPVfD7zoPnhSRkVPRR",p:"Retro Japanese pop art: cartoon chicken nugget surfeando massive teal wave. Wide smile, winking eye. Vintage orange background, red sun.",st:"",su:"",pt:"B"},
   {id:211,n:"Halloween Cereal Killer",a:"YES",cat:"Animals",fid:"18LzgLNLu2l0CCmqVU0WC1Bz8zd6cbG0j",p:"Spooky: cartoonish grim reaper con glowing eyes sosteniendo bowl de colorful cereal. Bats, jack-o-lantern, pine trees, crescent moon.",st:"",su:"",pt:"B"},
   {id:215,n:"Sigma Boy",a:"YES",cat:"Animals",fid:"17wLaSxt9j9FXQiwGKG07r4JM5mTgWN76",p:"Kawaii chubby penguin styled as sushi: orange salmon on head, belly como sushi roll en seaweed. SIGMA BOY en bold cream block letters.",st:"",su:"Animals",pt:"B"},
@@ -246,14 +249,13 @@ function vote(v){
   render();
 }
 function setFilter(f){filter=f;cur=0;render();}
+function mkOpts(arr,val){return arr.map(v=>'<option value="'+v+'"'+(v===val?' selected':'')+'>'+( v||'— ninguno')+'</option>').join('');}
 function exportResults(){
   const bad=P.filter(p=>votes[p.id]==='bad');
   const lines=bad.map(p=>'ID '+p.id+' | '+p.n+' ('+p.a+')\nhttps://drive.google.com/file/d/'+p.fid+'/view').join('\n\n');
-  const blob=new Blob(['Prompts que NO coinciden con su imagen ('+bad.length+'):\n\n'+lines],{type:'text/plain'});
+  const blob=new Blob(['No coinciden ('+bad.length+'):\n\n'+lines],{type:'text/plain'});
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='no_coinciden.txt';
-  a.click();
+  a.href=URL.createObjectURL(blob);a.download='no_coinciden.txt';a.click();
 }
 function render(){
   const c=counts();
@@ -272,10 +274,7 @@ function render(){
     '<button class="fb '+(filter==='bad'?'on':'')+'" onclick="setFilter(\'bad\')">No coinciden ('+c.bad+')</button>'+
     '<button class="fb '+(filter==='ok'?'on':'')+'" onclick="setFilter(\'ok\')">OK ('+c.ok+')</button>'+
     (done>0?'<button class="exp" onclick="exportResults()">↓ Exportar</button>':'');
-  if(L.length===0){
-    document.getElementById('main').innerHTML='<div class="empty">Sin prompts en este filtro.</div>';
-    return;
-  }
+  if(L.length===0){document.getElementById('main').innerHTML='<div class="empty">Sin prompts en este filtro.</div>';return;}
   if(cur>=L.length)cur=0;
   const p=L[cur];
   const e=edits[p.id]||{};
@@ -301,7 +300,7 @@ function render(){
       <div class="ibox" id="ib">
         <img src="${imgUrl(p.fid)}" alt="Prompt ${p.id}"
           onload="document.getElementById('ib').style.minHeight='auto'"
-          onerror="document.getElementById('ib').innerHTML='<div class=\\'noimg\\'>No cargó<br><a href=\\'https://drive.google.com/file/d/${p.fid}/view\\' target=\\'_blank\\'>Abrir en Drive →</a></div>'" />
+          onerror="document.getElementById('ib').innerHTML='<div class=\\'noimg\\'>No cargo<br><a href=\\'https://drive.google.com/file/d/${p.fid}/view\\' target=\\'_blank\\'>Abrir en Drive</a></div>'" />
       </div>
     </div>
     <div>
@@ -312,11 +311,11 @@ function render(){
   <div class="fields">
     <div class="field">
       <label>Style</label>
-      <input type="text" value="${st}" oninput="saveEdit('st',this.value)" placeholder="ej. Vintage, Feminine" />
+      <select onchange="saveEdit('st',this.value)">${mkOpts(STYLES,st)}</select>
     </div>
     <div class="field">
       <label>Subject</label>
-      <input type="text" value="${su}" oninput="saveEdit('su',this.value)" placeholder="ej. Animals, Floral" />
+      <select onchange="saveEdit('su',this.value)">${mkOpts(SUBJECTS,su)}</select>
     </div>
     <div class="field">
       <label>Printing type</label>
