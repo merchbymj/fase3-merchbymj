@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROMPTS AUDIT v2 — Faltantes</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f0f;color:#e0e0e0;min-height:100vh;padding:1rem}
+.wrap{max-width:900px;margin:0 auto}
+h1{font-size:18px;font-weight:500;margin-bottom:4px;color:#fff}
+.sub{font-size:12px;color:#555;margin-bottom:1rem}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+.prog{font-size:13px;color:#888}
+.stats{display:flex;gap:6px;flex-wrap:wrap}
+.stat{font-size:12px;padding:3px 10px;border-radius:6px;border:1px solid #333;color:#888;background:#1a1a1a}
+.stat.ok{border-color:#2d5a2d;color:#4caf50;background:#1a2e1a}
+.stat.sk{border-color:#5a4d2d;color:#ff9800;background:#2e2a1a}
+.card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.chdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;gap:12px}
+.pname{font-size:15px;font-weight:500;color:#fff;margin-bottom:6px}
+.meta{display:flex;gap:5px;flex-wrap:wrap}
+.bdg{font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid #333;color:#888;background:#111}
+.bdg.yes{border-color:#2d5a2d;color:#4caf50;background:#1a2e1a}
+.bdg.no{border-color:#5a2d2d;color:#f44336;background:#2e1a1a}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+.lbl{font-size:11px;color:#555;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.ibox{border:1px solid #2a2a2a;border-radius:6px;background:#111;min-height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ibox img{width:100%;max-height:300px;object-fit:contain;display:block}
+.noimg{color:#444;font-size:13px;text-align:center;padding:1rem;line-height:1.8}
+.noimg a{color:#4a9eff;text-decoration:none}
+.ptext{font-size:12px;line-height:1.7;color:#999;border:1px solid #2a2a2a;border-radius:6px;padding:.75rem;background:#111;overflow-y:auto;max-height:300px;min-height:220px}
+.fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem}
+@media(max-width:500px){.fields{grid-template-columns:1fr}}
+.field label{font-size:11px;color:#555;display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+.field select{width:100%;font-size:13px;padding:7px 10px;border-radius:6px;border:1px solid #2a2a2a;background:#111;color:#e0e0e0;outline:none;cursor:pointer}
+.field select:focus{border-color:#444}
+.field select option{background:#1a1a1a;color:#e0e0e0}
+.acts{display:flex;gap:8px;margin-bottom:8px}
+.btn{flex:1;padding:10px;border-radius:6px;border:1px solid #333;background:transparent;font-size:13px;font-weight:500;cursor:pointer;color:#e0e0e0;transition:background .15s}
+.btn:hover{background:#222}
+.btn.ok{border-color:#2d5a2d;color:#4caf50}
+.btn.ok:hover{background:#1a2e1a}
+.btn.sk{border-color:#5a4d2d;color:#ff9800}
+.btn.sk:hover{background:#2e2a1a}
+.btn:disabled{opacity:.4;cursor:default}
+.nav{display:flex;gap:8px}
+.fbar{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.fb{font-size:12px;padding:5px 12px;border-radius:6px;border:1px solid #2a2a2a;background:transparent;cursor:pointer;color:#888;transition:all .15s}
+.fb:hover{border-color:#444;color:#ccc}
+.fb.on{background:#222;border-color:#444;color:#fff}
+.exp{font-size:12px;padding:5px 12px;border-radius:6px;border:1px solid #1a4a7a;background:transparent;cursor:pointer;color:#4a9eff;margin-left:auto}
+.exp:hover{background:#0d2a4a}
+.empty{text-align:center;padding:3rem;color:#555;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>PROMPTS AUDIT v2 — Faltantes</h1>
+<div class="sub">201 prompts sin STYLE o PRINTING_TYPE completos</div>
+<div class="hdr">
+  <div class="prog" id="prog">0/201 revisados · 0%</div>
+  <div class="stats" id="stats"></div>
+</div>
+<div class="fbar" id="fbar"></div>
+<div id="main"></div>
+</div>
+
+<script>
+const STYLES=['','Bootleg','Bootleg, Masculine','Feminine','Feminine, Groovy','Feminine, Vintage','Feminine, Vintage, Groovy','Groovy','Groovy, Feminine','Groovy, Kids','Groovy, Kids, Feminine','Kids','Kids, Feminine','Masculine','Meme','Van Gogh','Vintage','Vintage, Groovy','Vintage, Kids'];
+const SUBJECTS=['','Animals','Animals, Patriotic','Animals, Sports','Floral','Floral, Patriotic','Patriotic','Patriotic, Floral','Sports','Sports, Floral'];
+const P=[
+  {id:106,n:'Farm Fresh',a:'NO',cat:'Typography   Text Based',fid:'1TZ598yi_p4oW3vUnMQ3wOafDX2UnzTPZ',p:'A vintage-style farm t-shirt design graphic sits on a [BACKGROUND_TYPE] background: at the top, the words "[DESIGN_WORD_1]" appear in large gray serif letters; beneath the art, two smaller gray lines ',st:'',su:'',pt:'L'},
+  {id:109,n:'9 x 9 Grid',a:'NO',cat:'Retro / Vintage',fid:'106hTguLSCtms69IfOL_0PJ_SC3gPi6H2',p:'A sweet and playful t-shirt design featuring a 3x3 grid layout with nine evenly spaced icons in a cute, hand- drawn style. The grid includes a mix of strawberries (some with heart-shaped seeds), pink ',st:'',su:'',pt:'B'},
+  {id:110,n:'VJ Day',a:'NO',cat:'Typography / Text Based',fid:'1nKr7S9uxddAS9qtvzMTJbTLM7E4qNPdL',p:'A vintage-style t-shirt design featuring a bold circular emblem with a WWII-era soldier saluting in the center, set against a distressed American flag backdrop. Around the outer ring, the text reads "',st:'',su:'Patriotic',pt:'B'},
+  {id:115,n:'Chick or Treat',a:'NO',cat:'Typography / Text Based',fid:'1VUypctjAp9WpS_8IHzZZ1J051R1nbvne',p:'A funny Halloween t-shirt design graphic of NICHE-SPECIFIC [NICHE_NAME] CHARACTERS lined up horizontally dressed in costumes: one as a witch, one as a [NICHE_NAME] CHARACTER, one holding a carved [DES',st:'',su:'Animals',pt:'B'},
+  {id:118,n:'UK Dachschund',a:'NO',cat:'Patriotic   Military',fid:'10OLyJEeOOSnfoTJ-5ev_FKsJW6dr8Ap8',p:'A bold and patriotic t-shirt design graphic of a serious-looking [NICHE_NAME] CHARACTER with its face and NICHE-SPECIFIC DETAILS painted in NICHE-SPECIFIC PATTERN, featuring intense amber eyes and rea',st:'',su:'',pt:'D'},
+  {id:120,n:'State Pride',a:'NO',cat:'Floral',fid:'1afMw6shuBkYvTspUsjWvkjSYnU2Ff_uO',p:'A black and white doodle-style t-shirt design graphic featuring iconic [NICHE_NAME] elements including NICHE-SPECIFIC OBJECTS, with playful heart and star accents, the cities "[DESIGN_WORD_1]" and "[D',st:'',su:'Animals',pt:'B'},
+  {id:121,n:'Halloween Silly Goose',a:'NO',cat:'Typography / Text Based',fid:'1bp9hZZhRograVPQYbjUtmWujPSi00OHA',p:'A t-shirt design graphic featuring a cartoon illustration of NICHE-SPECIFIC [NICHE_NAME] CHARACTERS in a row, walking to the right, each dressed in different spooky halloween costumes. The first [NICH',st:'',su:'Animals',pt:'B'},
+  {id:123,n:'Halloween Disco',a:'NO',cat:'Retro / Vintage',fid:'154-wEynnQtLRUhAXBwGq7JBDv-7ooqnF',p:'Retro vaporwave t-shirt design graphic of a [NICHE_NAME] CHARACTER dancing beneath a glowing purple-and- aqua disco ball, surrounded by electric pink and cyan daisies and 80s pixel squares, vibrant ma',st:'',su:'',pt:'B'},
+  {id:134,n:'Crazy Goose',a:'NO',cat:'Typography / Text Based',fid:'1UlluVePdN3S-kZpqmWLaDR7_c6MPiNCW',p:'A bold minimalist t-shirt design graphic in 2D flat vector art style of an angry [NICHE_NAME] CHARACTER holding a knife in its beak, standing upright with one foot lifted as if in motion. The [NICHE_N',st:'',su:'Animals',pt:''},
+  {id:139,n:'Trick or Treat',a:'NO',cat:'Typography / Text Based',fid:'1vz4vUn8pL4aUcsGKVU7CT6b_J00a_chp',p:'A cute retro pastel t-shirt design graphic featuring a [NICHE_NAME] CHARACTER wearing a white sheet with simple black eyes, surrounded by colorful hand-drawn flowers including roses, daisies, and tuli',st:'Groovy, Feminine',su:'',pt:''},
+  {id:165,n:'Playing Card',a:'NO',cat:'Floral',fid:'1RdAgQ-79eszimZ1Xl2i_N9xRrcUeCQWq',p:'A playful vector t-shirt design graphic in the style of a classic playing card, featuring a [NICHE_NAME] CHARACTER illustrated as the Queen of Hearts. the [NICHE_NAME] CHARACTER wears a golden crown a',st:'',su:'',pt:'B'},
+  {id:201,n:'Van Bigfoot',a:'NO',cat:'Typography / Text Based',fid:'1346xygw_7h1WYA8aUqBCNc84cSTtB8wM',p:'A funny t-shirt design graphic of Bigfoot wearing sunglasses and painting Starry Night on a canvas. The scene is set in a cozy artist\'s corner, with swirling blue and yellow brushstrokes capturing Van',st:'',su:'',pt:'B'},
+  {id:204,n:'Goose Club',a:'NO',cat:'Typography / Text Based',fid:'1XPI-qNk-PO7qBENxRZSRFZefQDKTdGnD',p:'A t-shirt design featuring a cute [NICHE_NAME] CHARACTER wearing a blue floral bow and holding a tumbler cup, standing confidently in front of a soft blue gingham background. Surrounding the [NICHE_NA',st:'',su:'',pt:'L'},
+  {id:212,n:'Pregnant Ghost',a:'NO',cat:'Typography / Text Based',fid:'1coz6sKz0648ft2pvgfDIjVIP37ocSFiI',p:'A cute Halloween-themed t-shirt design featuring a [NICHE_NAME] CHARACTER with a pregnant belly, smiling softly with a small flower near its head. The background is minimal, with just a few subtle ele',st:'',su:'',pt:'B'},
+  {id:228,n:'Hockey Season',a:'YES',cat:'Typography / Text Based',fid:'1m_xWu0bjr_ku2j0LrM3h0BN8doH4ZxFm',p:'A bold distressed typography t-shirt design with the phrase \'HOCKEY IS MY FAVORITE SEASON\' in all caps, featuring white, grungy, weathered text with rough textures. Silhouettes of hockey players are c',st:'',su:'Sports',pt:'D'},
+  {id:229,n:'Mexican Rose',a:'NO',cat:'Typography / Text Based',fid:'1uCdxja7yntzJlRbVVYbV1VLNFNrfpIxq',p:'A t-shirt design graphic featuring a vibrant graphic of a large rose with petals painted in the colors of the Mexican flag-green on the left, white in the center with the national emblem, and red on t',st:'',su:'Patriotic',pt:'B'},
+  {id:230,n:'Japanese Style Dragon',a:'NO',cat:'Floral',fid:'1sU-aPrYxe8EyBU1ZSSS4_TqRBXjGnTg9',p:'A t-shirt design graphic featuring a detailed fantasy art print of a black dragon with detailed scales and spiky horns, positioned in a defensive stance with wings spread. The dragon is surrounded by ',st:'',su:'',pt:'B'},
+  {id:231,n:'Goose Thanksgiving',a:'NO',cat:'Typography / Text Based',fid:'1iq0DTG6Nk8iadokykkb-Z4YSAxaI0BSz',p:'A cute Thanksgiving-themed t-shirt design featuring four cartoon [NICHE_NAME] CHARACTERS dressed in festive outfits: one as a pilgrim man, one as a pilgrim woman holding a pie, one as a turkey with ta',st:'',su:'Animals',pt:'D'},
+  {id:232,n:'Christmast 4 Panels',a:'YES',cat:'Typography / Text Based',fid:'1xGLZNFPlZ8ycZ-VatmEAsPGd5OyN13Zo',p:'A festive Christmas-themed t-shirt design in the style of a four-panel vintage illustration layout. Each vertical panel features a different holiday element with soft glowing pastel colors like red, g',st:'',su:'',pt:'B'},
+  {id:235,n:'Teacher + Hobby',a:'YES',cat:'Typography / Text Based',fid:'13D9-2Ymq3ZHHq_5UN-oQldfjt_NTcAzl',p:'A bold and empowering t-shirt design featuring the phrase "[DESIGN_WORD_1]" in a strong, blocky font with alternating hot pink and white text. The design includes biker-style wings above and below, wi',st:'',su:'',pt:'D'},
+  {id:237,n:'Bossy Math Teacher',a:'YES',cat:'Typography / Text Based',fid:'14-55ccVObIqp2d7LtYsY0LIFTowhOrhM',p:'A colorful and playful t-shirt design in a retro 70s-inspired style featuring the phrase "[DESIGN_WORD_1]" in bold, groovy, multicolored bubble letters. The text is arranged in a stacked, dynamic layo',st:'Groovy, Kids',su:'',pt:''},
+  {id:238,n:'Jesus Cross',a:'YES',cat:'Typography / Text Based',fid:'1knfiyRDl9uaWrhFukufz45GHuVpzzshU',p:'A t-shirt design graphic featuring a monochromatic, faith-themed design featuring a large, ornate white cross filled with elegant floral and leafy vine elements. The phrase "[DESIGN_WORD_1]" is seamle',st:'',su:'',pt:'D'},
+  {id:240,n:'F-Caw-F Christmas',a:'YES',cat:'Typography / Text Based',fid:'18bYVJUrFVWAWNtBKsKs5tB9U4KjxnO3E',p:'An edgy Christmas-themed t-shirt design featuring a stylized black crow with glowing red eyes perched on a twisted, gnarled tree branch. The crow wears a red Santa hat, and behind it is a large full m',st:'',su:'Animals',pt:'B'},
+  {id:241,n:'Pho King Delicious',a:'YES',cat:'Typography / Text Based',fid:'1iPMFdnoCJXE64JQ_ygfAjmcCUS0fqrCK',p:'A kawaii 2D flat vector art t-shirt design graphic of a happy animated pho noodle bowl with a smiling face, wearing dark brown sunglasses, filled with noodles, green onions, herbs, and red meat slices',st:'',su:'',pt:'L'},
+  {id:246,n:'Christianity Text Designs',a:'YES',cat:'Typography / Text Based',fid:'1rrr611SLwNh45tEeNnGMitGBGrBx-kfT',p:'A t-shirt design graphic featuring create a faith-based design featuring the phrase "[DESIGN_WORD_1]" The word "[DESIGN_WORD_2]" should be in a large, flowing cursive script with an underline for emph',st:'',su:'',pt:'L'},
+  {id:248,n:'Raccoon Riding Goose',a:'YES',cat:'Typography / Text Based',fid:'1ar49BUFzCmqGcNLW5UZa9Gpsp5vDk9bZ',p:'A humorous black-and-white t-shirt illustration of a [NICHE_NAME] CHARACTER confidently riding on the back of a [NICHE_NAME] CHARACTER in mid- stride. the [NICHE_NAME] CHARACTER is upright, looking pr',st:'',su:'Animals',pt:'D'},
+  {id:249,n:'Happy Gravy',a:'YES',cat:'Typography / Text Based',fid:'1HByzZ0lLObEdXYr6RcMMiopVGUbNW5-A',p:'A bold and funny t-shirt design featuring the phrase "[DESIGN_WORD_1]" in large, impactful fonts. The words "[DESIGN_WORD_2]" and "[DESIGN_WORD]" are emphasized with contrasting color outlines (white ',st:'',su:'',pt:'B'},
+  {id:251,n:'IDGAF',a:'YES',cat:'Typography / Text Based',fid:'1_3e5_PTQPFGQb9BLHYzqEclf3i64l3_c',p:'A t-shirt design graphic featuring a bold and sassy design featuring the phrase "[DESIGN_WORD_1]" in a playful mix of fonts. The word "[DESIGN_WORD_2]" is in a flowing cursive script with a small hear',st:'',su:'',pt:'D'},
+  {id:252,n:'2 Daughters',a:'YES',cat:'Typography / Text Based',fid:'1rS-SAGTe7iFj7Hw440ZuVIvx66TXhDi8',p:'A t-shirt design graphic featuring a fun, bold, and colorful design featuring the phrase "[DESIGN_WORD_1]" in a playful retro font. Each word is in a different pastel color (mint green, lavender, peac',st:'',su:'',pt:'B'},
+  {id:253,n:'Puerto Rico Heart',a:'NO',cat:'Kawaii / Cute',fid:'1iet_XjDfZXmS3WIkVjQz3TCTKBLskGrs',p:'A t-shirt design graphic featuring a cute and patriotic design inspired by the Puerto Rican flag, featuring a grid of decorative bows and watercolor hearts in the flag\'s colors: red, white, and blue. ',st:'',su:'Patriotic',pt:'B'},
+  {id:254,n:'Fit Daschund',a:'NO',cat:'Typography / Text Based',fid:'1YcmR4-Duc9kAcNVS8opTQv9ob4Dy8vNA',p:'A t-shirt design graphic featuring a humorous and bold design featuring a chubby cartoon [NICHE_NAME] CHARACTER lifting a heavy barbell with determination. The [NICHE_NAME] CHARACTER has muscles and a',st:'',su:'Animals',pt:'B'},
+  {id:255,n:'67 Christmas',a:'NO',cat:'Typography / Text Based',fid:'1j3mXpZK-RrQjVmLjGJI1szB1x9mNUsmw',p:'A festive Christmas-themed t-shirt design featuring the bold numbers "[DESIGN_WORD_1]" in large, rounded font with a red and black buffalo plaid pattern. The top of each number is covered in thick, wh',st:'',su:'',pt:'B'},
+  {id:256,n:'Flying Fuck',a:'YES',cat:'Typography / Text Based',fid:'1GRVITvA7-dSTiwudfnUaqyFNiaqU4iAj',p:'A t-shirt design graphic featuring a vintage-style design featuring a skeletal figure extending its arm toward a flying bat surrounded by vibrant, autumn-colored flowers and leafy foliage, in warm ton',st:'',su:'',pt:'D'},
+  {id:257,n:'Fitness Food Joke',a:'YES',cat:'Typography / Text Based',fid:'11xZ4366Z5546KK6gUCyI-pDFX-zx_CaT',p:'A bold humorous t-shirt design graphic in a minimalist vector art style, featuring a simple line-art illustration of a taco with lettuce, cheese, and beef filling. Above the taco, the text reads "[DES',st:'',su:'',pt:'L'},
+  {id:260,n:'Key West Beach Boating Locations',a:'YES',cat:'Typography / Text Based',fid:'1Z62pCWQPMozpVV8nOg71rsIYkZtQLKUH',p:'A vintage sunset t-shirt design graphic featuring a retro-style fishing boat cruising on calm ocean waters, with a bold striped half-sun in warm orange and yellow hues in the background, a lone figure',st:'',su:'Sports',pt:'B'},
+  {id:264,n:'Rats Arse',a:'YES',cat:'Typography / Text Based',fid:'1zkAidtxN08R9ihpbvRiH_bKFn5gzLDjP',p:'A vintage-style, single-color t-shirt design featuring a grumpy cartoon donkey on the right and a mischievous rat on the left with a smug expression, confidently gesturing. Both characters are illustr',st:'',su:'',pt:''},
+  {id:265,n:'Goose + Toe Humor',a:'YES',cat:'Typography / Text Based',fid:'1ev6Ndr09o0_rBjmSEfKW8s8LnUsRKxdy',p:'A t-shirt design graphic featuring a playful and bold design featuring a silly cartoon [NICHE_NAME] CHARACTER standing confidently with a mischievous grin, sunglasses, and its wings on its hips. The [',st:'',su:'',pt:'B'},
+  {id:266,n:'Fishing Innuendo',a:'YES',cat:'Typography / Text Based',fid:'1xuRpcZ4up_sdY4TjYXJ-qqwaXizUpX11',p:'A bold and humorous fishing-themed t-shirt design featuring a large illustrated bass being held up by two hands. The illustration is centered and stylized with a vintage, comic-inspired halftone shadi',st:'',su:'Animals',pt:'B'},
+  {id:269,n:'Mothman',a:'YES',cat:'Typography / Text Based',fid:'15ZK63MArKuII78OQdqJUpNVyLAkMq3G1',p:'A t-shirt design graphic featuring a horror-themed graphic design in a dark gothic style featuring a silhouette of the Mothman cryptid with glowing red eyes, wings spread wide, standing ominously in f',st:'',su:'',pt:'B'},
+  {id:270,n:'Coquito Season',a:'NO',cat:'Typography / Text Based',fid:'1MAtXln4dRhGHjAFK_Sn6fT64AeVytYix',p:'A retro vintage t-shirt design graphic celebrating "[DESIGN_WORD_1]" featuring a creamy beige bottle and matching glass of coquito with a halved coconut and cinnamon sticks beside them. In the backgro',st:'',su:'Patriotic',pt:'B'},
+  {id:271,n:'Political Poster Style',a:'NO',cat:'Typography / Text Based',fid:'1BeyDKWL1t2BXs9X8lpIMC8IE37yLjCFH',p:'A t-shirt design graphic featuring a retro political poster-style design graphic of a obama in a suit and tie, depicted in bold contrasting red, blue, and beige tones, inspired by vintage campaign art',st:'',su:'',pt:'B'},
+  {id:272,n:'Lorem Ipsum',a:'NO',cat:'Typography   Text Based',fid:'1PdlxfThNc0bdEx2va5iVY8MP7PoIUddL',p:'A vintage retro-style t-shirt design graphic featuring four vertical panels with rough textured edges, each showcasing iconic [NICHE_NAME] scenes: SCENE 1, SCENE 2, SCENE 3, and SCENE 4. The word "[DE',st:'',su:'Animals',pt:'B'},
+  {id:274,n:'Owl',a:'YES',cat:'Typography / Text Based',fid:'1zkNK5tX0_vkR9kMU37J1O1lK2R2vllwo',p:'A cute and colorful t-shirt design featuring a group of cartoon owls sitting on a tree branch, with the phrase "[DESIGN_WORD_1]" above them in bold black text. The owls are drawn in pastel shades like',st:'',su:'Animals, Patriotic',pt:'L'},
+  {id:277,n:'Promoted to Grandad',a:'YES',cat:'Typography / Text Based',fid:'1goQiYem5m6Nc15yvIq2OdX4y3xKzKb7k',p:'A sweet and heartwarming t-shirt design graphic featuring the phrase "[DESIGN_WORD_1]" above, "[DESIGN_WORD_2]" in the middle, and "[DESIGN_WORD]" below in a centered stacked layout. Add small NICHE-S',st:'',su:'',pt:'L'},
+  {id:280,n:'Angry Cat Coffee',a:'YES',cat:'Animals',fid:'1jaUwNuFPwuUmRi8SON_2vgyj3-yJt4xX',p:'A t-shirt design graphic featuring a funny and slightly dark design featuring an angry-looking black [NICHE_NAME] CHARACTER with sharp, intense yellow eyes, giving a clear expression of annoyance or m',st:'',su:'Animals',pt:''},
+  {id:284,n:'Floral Peace + text',a:'YES',cat:'Typography / Text Based',fid:'1blgq3ODgUjLLqoGXcU7C2yProqy0D0ta',p:'A retro 70s hippie-style t-shirt design graphic featuring a large [DESIGN_WORD] symbol made entirely of colorful flowers and green leaves, including daisies, sunflowers, and orange blossoms, arranged ',st:'Groovy',su:'',pt:''},
+  {id:288,n:'Birthday Cruise Squad',a:'YES',cat:'Typography / Text Based',fid:'1bhZ3LLO77ZiBsyJ7DrJ5phzUqkiODcde',p:'A fun and tropical birthday t-shirt design for a cruise trip. The text says "[DESIGN_WORD_1]" with bold vintage-style lettering. The design features large sunset-reflective aviator sunglasses with pal',st:'Groovy',su:'',pt:''},
+  {id:289,n:'Camoflauge Bows + Hunting',a:'YES',cat:'Typography / Text Based',fid:'1DH_DJLxgrB2u2rGtgMqgELRxziuXqajU',p:'A rustic country-style t-shirt design graphic featuring the phrase "[DESIGN_WORD_1]" in bold, varsity-style camouflage block letters at the top. Below, three vertically striped panels contain detailed',st:'',su:'',pt:''},
+  {id:290,n:'Naïve Doodle Art',a:'YES',cat:'Typography / Text Based',fid:'1_Xx9cB3eUr6hjm6K8_mted1aGCa96DaF',p:'A childish, hand-drawn t-shirt design graphic of a funny pig holding a paintbrush and an artist\'s palette, drawn in a messy, uneven crayon style as if a 4-year-old drew it. The lines are wobbly and im',st:'',su:'Animals',pt:''},
+  {id:291,n:'Butterfly + Location Girl',a:'YES',cat:'Typography / Text Based',fid:'16ryVsrWpRMvE2t0tagGrITcwRxw1lus-',p:'A t-shirt design graphic featuring a bold and patriotic design of a butterfly with red, white, and blue wings styled like the American flag. Below the butterfly, the text "[DESIGN_WORD_1]" is written ',st:'Feminine',su:'Patriotic',pt:''},
+  {id:293,n:'Book Dragon Retro',a:'YES',cat:'Typography / Text Based',fid:'1SV0pR0QBeFaUnv5hvoJDNA6W9kTuC8rY',p:'A t-shirt design graphic featuring a bold monochrome design of a fierce dragon reading a book while surrounded by stacks of books. The phrase "[DESIGN_WORD_1]" is placed above the dragon\'s head and "[',st:'',su:'Animals',pt:''},
+  {id:296,n:'Three Curly Frames Style',a:'YES',cat:'Typography / Text Based',fid:'1G8eykAUfqtMAXPHgCNohPImdjF7re5Ap',p:'A t-shirt design graphic featuring a cute pastel Christmas-themed design featuring three framed panels in a neat row, each with a scalloped edge. The two side panels contain nutcracker illustrations i',st:'Groovy, Feminine',su:'',pt:''},
+  {id:298,n:'Flower Whisperer',a:'YES',cat:'Typography / Text Based',fid:'1hfy32VprURpVh-uwPM4ktrKYDlsUZ7-X',p:'A t-shirt design graphic featuring a soft floral illustration of various wildflowers growing upward in pastel shades of peach, cream, pink, and dusty green. The flowers are arranged in a gentle, natur',st:'Groovy, Feminine',su:'Floral',pt:''},
+  {id:299,n:'Goblincore Mushroom',a:'YES',cat:'Typography / Text Based',fid:'16rShWicH6dy3NGd0bty3qAxxWcJ1Hk9r',p:'A t-shirt design graphic featuring a vintage dark academia-style illustration of mushrooms in earthy red and beige tones, arranged in a forest cluster. Some mushrooms have smiling faces while others a',st:'',su:'Animals',pt:''},
+  {id:300,n:'Silly Goose Floral',a:'YES',cat:'Typography / Text Based',fid:'1UyDEftbECtiyEixyk7b1JhkNDRNljEP7',p:'A t-shirt design graphic featuring a whimsical and girly design with the phrase "[DESIGN_WORD_1]" at the top and "[DESIGN_WORD_2]" at the bottom, both written in an evenly spaced, playful hand-lettere',st:'Groovy, Feminine',su:'Floral',pt:''},
+  {id:302,n:'Round Badge Goose + Book',a:'YES',cat:'Typography / Text Based',fid:'13lRv-Lbbgk3TrJ-xnSj1Mo2U-vsP_AVU',p:'A t-shirt design graphic featuring a retro-inspired design featuring a cute cartoon [NICHE_NAME] CHARACTER wearing glasses and holding a stack of books. The [NICHE_NAME] CHARACTER is centered inside a',st:'',su:'Animals',pt:''},
+  {id:303,n:'Retro Cassettes',a:'YES',cat:'Animals',fid:'1vGgOSEDvV8iFnH4kL8nfcYScMSD9h0Zw',p:'A t-shirt design graphic featuring a retro country music design for a white background featuring a collage of pastel cassette tapes. Cacti, daisies, and stars are scattered around the tapes. The text ',st:'Groovy',su:'',pt:''},
+  {id:305,n:'Drummer Gradient Designs',a:'YES',cat:'Typography / Text Based',fid:'1lBdzxhhOBDHRhf3SiDQkZprMcbtx1-zL',p:'A t-shirt design graphic featuring a bold drum-themed design with a detailed vintage-style drum set in blue and orange gradient ink. The phrase is updated to say "[DESIGN_WORD_1]" at the top and "[DES',st:'',su:'',pt:''},
+  {id:306,n:'Old School Motorcyle',a:'YES',cat:'Typography / Text Based',fid:'1UceYTTMUn4KJ4JYlL6wwjVRU7ivoEOnI',p:'A t-shirt design graphic featuring a vintage-style motorcycle illustration in off-white ink with the phrase "[DESIGN_WORD_1]" above and "[DESIGN_WORD_2]" below, both in bold distressed fonts. The desi',st:'',su:'',pt:''},
+  {id:313,n:'Papa Hunting Designs',a:'YES',cat:'Animals',fid:'1az2kmhvwoLBCxAp4-djZ3zT0A8BWwSdF',p:'A t-shirt design graphic featuring a bold outdoors-themed design that spells ouThe phrase "[DESIGN_WORD]" in large block letters filled with detailed vintage-style wilderness illustrations. Each lette',st:'',su:'Animals',pt:''},
+  {id:315,n:'Support Your Local',a:'YES',cat:'Typography / Text Based',fid:'10ZTgSAI85zJXCAYi_Y9nfTUwP59FCfOt',p:'A t-shirt design graphic featuring a vintage-style cartoon NICHE-SPECIFIC DRINK design isolated on a [BACKGROUND_TYPE] background, featuring a smiling NICHE-SPECIFIC DRINK bean and a cheerful takeaway',st:'',su:'Animals',pt:''},
+  {id:316,n:'Succulent Hand Drawn Boxes',a:'YES',cat:'Typography / Text Based',fid:'1LarVAwH45teYxEFNFOywUs6LA0w7YKW7',p:'A t-shirt design graphic featuring a quirky, hand-drawn design featuring the phrase "[DESIGN_WORD_1]" in the center in playful, loose script that feels casual and imperfect, as if drawn by hand. The l',st:'',su:'Floral',pt:''},
+  {id:318,n:'Japanese Floating Pizza Poster',a:'YES',cat:'Floral',fid:'1Ii7_9QmP0kBvO_G0ui05-6q8GLIo9ZqQ',p:'A Japanese vintage poster-style t-shirt design graphic featuring a joyful slice of pizza with gooey cheese and pepperoni being abducted by a UFO, floating mid-air in a glowing golden-yellow tractor be',st:'',su:'Floral',pt:''},
+  {id:319,n:'Hand Drawn Child Design',a:'YES',cat:'Typography / Text Based',fid:'175fj6YQ45WQQp90UnTDYe8FBVVh0Q3S1',p:'A t-shirt design graphic featuring a playful one line, hand-drawn illustration in a simple, childlike style featuring a smiling dinosaur riding a small bicycle. The dinosaur has its tiny arms raised p',st:'',su:'Animals',pt:''},
+  {id:320,n:'Retro Illustration Collage',a:'YES',cat:'Typography / Text Based',fid:'1NmjrgmYYNwVlMJiYunNU0IyC9BzZcr8O',p:'A t-shirt design graphic featuring a playful one-color line art design dedicated to the Mojito cocktail, featuring the word "[DESIGN_WORD_1]" in bold, stylized retro lettering at the top. Below the ti',st:'',su:'',pt:''},
+  {id:324,n:'Things I do in my spare time',a:'YES',cat:'Typography / Text Based',fid:'13GI3ngT_HtSBtqHR9lAlCbLm7PpRsz_N',p:'A t-shirt design graphic featuring pure [BACKGROUND_TYPE] background. Centered T_shirt design with bold, rounded, uppercase sans_serif typography: first line large and wide, second line slightly small',st:'',su:'Sports',pt:''},
+  {id:325,n:'At my age I need glasses',a:'YES',cat:'Typography / Text Based',fid:'1uzVoslYcdTT7yFhljcZ31j3N9gilODTd',p:'A t-shirt design graphic featuring a playful and retro-style holiday design featuring various cocktail and drink glasses with stars and sparkles around them, all in a bold monochromatic red ink. In th',st:'',su:'',pt:''},
+  {id:327,n:'Let\'s Go Pink Cowgirl',a:'YES',cat:'Typography / Text Based',fid:'1OW4aPt045zpdYDjc4kgwon2FwbHx8WEo',p:'A t-shirt design graphic featuring a vibrant Western-inspired digital illustration isolated on a [BACKGROUND_TYPE] background, featuring the bold hand-lettered phrase "[DESIGN_WORD_1]" in playful pink',st:'Feminine',su:'',pt:''},
+  {id:328,n:'Promoted to Big Brother',a:'YES',cat:'Typography / Text Based',fid:'172hH7687Cbey1_LUZu0a-aLmrDtwfAwA',p:'A t-shirt design graphic featuring create a playful children\'s graphic featuring two colorful tractors-one large red tractor and one smaller green tractor-isolated on a [BACKGROUND_TYPE] background. U',st:'Kids',su:'',pt:''},
+  {id:329,n:'Queen of the Camper',a:'YES',cat:'Typography / Text Based',fid:'1v-CrTsTsiD-7b61WadzHnfsenMZgw3D4',p:'A t-shirt design graphic featuring a fun and whimsical vintage-style camper illustration with a feminine pink and white color scheme. The camper sits on a simple line to ground it, with rays radiating',st:'',su:'',pt:''},
+  {id:330,n:'Vintage Fishing Pun',a:'YES',cat:'Typography / Text Based',fid:'1V3iydW2N1w0BkD_J2qeZ_LEzfJpp01Aw',p:'A vintage rugged t-shirt design graphic of three lively rainbow trout illustrated in a distressed retro style, with bold curved banner text that reads \'Fish Around\' above them and \'And Find Trout\' bel',st:'',su:'Animals',pt:''},
+  {id:331,n:'Golf Cherry',a:'YES',cat:'Kawaii / Cute',fid:'1wfbKWmlJlFzi3c9w0oKil3qC32B9h8cC',p:'A t-shirt design graphic featuring a playful and cute graphic on a flat black background. The design features two realistic golf balls positioned like cherries, with green stems joined together at the',st:'',su:'',pt:''},
+  {id:332,n:'Chicken Moods',a:'YES',cat:'Illustration / Graphic',fid:'1g7UOj3mPsyBCfFsQJaWBmsclu3W34dsi',p:'A t-shirt design graphic featuring a humorous design titled "[DESIGN_WORD_1]" in bold white uppercase text at the top. Below, a 3x3 grid featuring nine identical cartoon chicken heads, each with a bla',st:'',su:'',pt:''},
+  {id:333,n:'Animals of Christmas',a:'YES',cat:'Animals',fid:'1d7vtMqXOX6h84pEW3XPCDrBhzI9XRRVd',p:'A t-shirt design graphic featuring on a solid pure neon green background, recreate a centered, high‑DPI, vector‑sharp kawaii T‑shirt illustration featuring twelve chibi dogs with big round eyes and cu',st:'',su:'Animals',pt:''},
+  {id:334,n:'Glitchy Tape',a:'YES',cat:'Typography / Text Based',fid:'1yrpG3R12QAcrZEdONK74fPR5CuoqvF4W',p:'A bold retro T-shirt design isolated on a [BACKGROUND_TYPE] background. Centered is a large white outline of a vintage cassette tape in a clean stencil-style. Above the cassette in bold, distressed up',st:'',su:'',pt:''},
+  {id:335,n:'Festive Goose',a:'YES',cat:'Typography / Text Based',fid:'1Ms1ey8ld12P4GM8dOtyqB31uGJceZegX',p:'A t-shirt design graphic featuring a humorous and chaotic design featuring a wide-eyed white [NICHE_NAME] CHARACTER tangled in colorful Christmas lights, running with flailing wings and an overwhelmed',st:'',su:'Animals',pt:''},
+  {id:341,n:'40 Cowgirl Birthday',a:'YES',cat:'Floral',fid:'1_Xk081sTkmT19OX8-7rzxVO5UXoFAloA',p:'A t-shirt design graphic featuring on a solid pure grey background, create a large bold blocky western number "[DESIGN_WORD_1]" centered, with thick strokes and sharp corners, filled edge‑to‑edge with',st:'',su:'Floral',pt:''},
+  {id:342,n:'New Year Cruise',a:'YES',cat:'Typography / Text Based',fid:'1bMXVitgLHHpBDuy73q7wHiX1ZihayQiQ',p:'a bold New Year\'s Eve T-shirt design with the phrase "[DESIGN_WORD_1]" in mixed uppercase white and gold text. Center a stylized cruise ship graphic in gold and white with sparkling accents, flanked b',st:'',su:'',pt:''},
+  {id:343,n:'100 Days of School',a:'YES',cat:'Typography / Text Based',fid:'1HE3Mywvp84vmxAJeNpQPGDMmigINA1fW',p:'A t-shirt design graphic featuring playful with the phrase "[DESIGN_WORD_1]" using bright, dripping text and basketballs. Style the number "[DESIGN_WORD_2]" using a bold blue-and-pink dripping texture',st:'Kids',su:'Sports',pt:''},
+  {id:344,n:'Bruh Corgi',a:'YES',cat:'Typography / Text Based',fid:'1JDAMkpcXV3WSFldoOqKAYaeBXiw2Hx60',p:'A t-shirt design graphic featuring a monochrome illustration of a corgi sitting upright, playing a saxophone with a deadpan expression. Use a vintage hand-drawn ink style with detailed linework, cross',st:'',su:'Animals',pt:''},
+  {id:345,n:'Hot Sauce and Bad Decisiosn',a:'YES',cat:'Typography / Text Based',fid:'1DAoSi_FMsQfWFCXtZ7liYLHD6e9o0sBv',p:'A t-shirt design graphic featuring a humorous that reads "[DESIGN_WORD_1]" Use playful, hand-lettered typography in red for "[DESIGN_WORD_2]" "[DESIGN_WORD]" and "[DESIGN_WORD]" and write "[DESIGN_WOR',st:'',su:'',pt:''},
+  {id:346,n:'Uncle Promoted',a:'YES',cat:'Typography / Text Based',fid:'1GCe5nuR0Ao6Fc2WO2YRN2WBc0P4MGZTd',p:'A t-shirt design graphic featuring a bold and playful design featuring a large, muscular grizzly bear wearing sunglasses, flexing both arms in a proud, exaggerated pose. The bear should be centered in',st:'',su:'Animals',pt:''},
+  {id:347,n:'Whiskey',a:'YES',cat:'Typography / Text Based',fid:'1KsCASRhn_1rw1djVEGVqZSBAMoq-yxhz',p:'A t-shirt design graphic featuring a bold and vintage-style design featuring the phrase "[DESIGN_WORD_1]" at the top in decorative curved text. In the center, place a detailed illustration of a classi',st:'',su:'',pt:''},
+  {id:348,n:'Football 4 Blocks',a:'YES',cat:'Retro / Vintage',fid:'1i-WaBiYT-jYIVWVoo-nvESm-FzKollKp',p:'A t-shirt design graphic featuring a bold and textured design inspired by vintage sports posters. Divide the composition into four rectangular panels arranged in a 2x2 grid. Each panel should feature ',st:'',su:'',pt:''},
+  {id:352,n:'Celebrate Diversity Alcohol',a:'YES',cat:'Kawaii / Cute',fid:'1vJKH-Qt-hv2C925Ukdons9_5SVjoIr__',p:'A t-shirt design graphic featuring black background T‑shirt design featuring centered tall narrow hand-drawn sans-serif white text "[DESIGN_WORD_1]" arched very slightly across the top and "[DESIGN_WO',st:'',su:'',pt:''},
+  {id:353,n:'Animals of the World',a:'YES',cat:'Typography / Text Based',fid:'1X3LxdVao5Y0jqbdr7qFq_xkMtx7Yn8ME',p:'A t-shirt design graphic featuring centered cute infographic graphic design on a pure [BACKGROUND_TYPE] background featuring 12 chibi-style beetle species arranged in a 3x4 grid under the title text "',st:'',su:'',pt:''},
+  {id:354,n:'One More Rock',a:'YES',cat:'Typography / Text Based',fid:'160t6p6y8PLx6Jl1l8_Z-IpdX3vZE3gSo',p:'A t-shirt design graphic featuring a soft and whimsical illustration on a flat, muted background featuring the handwritten phrase "[DESIGN_WORD_1]" in a playful, script-style white font at the center.',st:'Feminine',su:'',pt:''},
+  {id:358,n:'Jesus and Banjos',a:'YES',cat:'Typography / Text Based',fid:'18v-yWUJPmxPBf-moB17qcorV2Jjjtzhc',p:'A t-shirt design graphic featuring a bold, vintage-style design on a flat black background featuring distressed off-white ink. The design includes dynamic, hand-drawn typography that reads: "[DESIGN_W',st:'',su:'',pt:''},
+  {id:359,n:'Trashed Panda',a:'YES',cat:'Typography / Text Based',fid:'1GbInbqKbfOCE1AjqH1p2ZETRKIrT4Yoj',p:'A t-shirt design graphic featuring a detailed vintage-style single-color vector illustration, isolated on a [BACKGROUND_TYPE] background, rendered in deep teal blue. The central graphic features a [NI',st:'',su:'Animals',pt:''},
+  {id:360,n:'Pickles Girls',a:'YES',cat:'Art Styles',fid:'1wWHVE4o0o7xwbqKwSkvOuruNDQtpAPjC',p:'A t-shirt design graphic featuring a detailed realistic watercolor illustration style graphic, isolated on a [BACKGROUND_TYPE] background, featuring a 3x3 grid of green bows and jars of NICHE-SPECIFIC',st:'',su:'',pt:''},
+  {id:361,n:'100 Days of School',a:'YES',cat:'Typography / Text Based',fid:'16WA-atqeLUffpDbAcvGGw8mts0egJ4GB',p:'T-shirt vector graphic design, isolated on a [BACKGROUND_TYPE] background. The text reads: "[DESIGN_WORD_1]". The typography is a mix of groovy, retro 70s bubble letters and wavy fonts. The numbers "[',st:'',su:'',pt:''},
+  {id:362,n:'Anatomy of a Dog',a:'YES',cat:'Typography / Text Based',fid:'1V9VX93dH6SxnWoUeR3JmXuflcFTFgcV6',p:'A t-shirt design graphic featuring white, bold, all-caps blocky sans-serif typography, crisp white arrows and labels surrounding a centered, clean vector-style Beagle illustration in tricolor black, t',st:'',su:'',pt:''},
+  {id:363,n:'Doberman Hair',a:'YES',cat:'Typography / Text Based',fid:'1tjzOcpT6VYWnI2WO5obw9cxLcA_vaQ2G',p:'A t-shirt design graphic featuring a clean and humorous design on a flat white background. The top text reads "[DESIGN_WORD_1]" in simple, uppercase black font. Below that, "[DESIGN_WORD_2]" is bolded',st:'',su:'',pt:''},
+  {id:364,n:'Look at Planes',a:'YES',cat:'Typography / Text Based',fid:'1fcLofbcU5el-BezUtr44I-UTfz8LKKwz',p:'A t-shirt design graphic featuring a bold and humorous vintage-style design on a flat black background. The top text reads "[DESIGN_WORD_1]" in large distressed tan uppercase letters, followed by "[DE',st:'',su:'',pt:''},
+  {id:365,n:'6 to my 7 Valentines',a:'YES',cat:'Typography / Text Based',fid:'1FNunLQFEa2eMfDzKjMZ2dggcCXdeup4V',p:'A t-shirt design graphic featuring a bold and playful design on a flat black background featuring the phrase "[DESIGN_WORD_1]" in large, glossy pink bubble lettering with a drippy, slime-like texture.',st:'',su:'',pt:''},
+  {id:366,n:'Toilet Clogging',a:'YES',cat:'Typography / Text Based',fid:'1G1mdIxN2qi6cKitcZ-SSz8YhHvKEmt0g',p:'A t-shirt design graphic featuring a bold and humorous design on a flat black background featuring the phrase "[DESIGN_WORD_1]" in large, curved white bubble letters. Centered beneath the text, includ',st:'',su:'',pt:''},
+  {id:368,n:'TomFoolery',a:'YES',cat:'Typography / Text Based',fid:'1zLm6FJ--L01ZVyAH7t4NEIa8rurLhBRu',p:'A t-shirt design graphic featuring a humorous black-and-white design on a flat black background featuring a simple, hand-drawn cartoon-style [NICHE_NAME] CHARACTER riding on the back of a chicken. the',st:'',su:'',pt:''},
+  {id:369,n:'Just Be Fartin’',a:'YES',cat:'Animals',fid:'10PASPG1HB0ryh3eQP0-3gC5xKRayuwIh',p:'A t-shirt design graphic featuring black background. Centered single-color beige cartoon design of a standing cowboy [NICHE_NAME] CHARACTER, hands on hips, facing slightly left, with large brimmed cow',st:'',su:'',pt:''},
+  {id:370,n:'I Steal Hearts Valentines',a:'YES',cat:'Typography / Text Based',fid:'1xMepaRY8dGXKeBa_4tTFqeCp3-IC8P97',p:'A kawaii t-shirt design graphic of a chubby cartoon [NICHE_NAME] CHARACTER wearing red sunglasses, standing upright and holding a large red heart with the number "[DESIGN_WORD_1]" on it, surrounded by',st:'',su:'',pt:''},
+  {id:371,n:'Pastry Club',a:'YES',cat:'Typography / Text Based',fid:'1snaqBOEIZ-S1VPpU-YHLF0SFWHXvDnXp',p:'A t-shirt design graphic featuring a fun and lighthearted design on a flat white background with bold red-orange text that reads "[DESIGN_WORD_1]" in playful, chunky uppercase font-"[DESIGN_WORD_2]" a',st:'',su:'',pt:''},
+  {id:372,n:'Coquette Cherry 67 Valentine',a:'YES',cat:'Animals',fid:'1YPhtNZrLSuf-q1YN4EnCRUAkt9IsSVvi',p:'A t-shirt design graphic featuring cute vector design on [BACKGROUND_TYPE] background featuring two glossy red cherries with lush rounded forms floating diagonally, front cherry tilted left showing a ',st:'',su:'',pt:''},
+  {id:373,n:'Not Friendly Frog',a:'YES',cat:'Typography / Text Based',fid:'1lbHNeCb3s2Isd2XJXASyRRcxsjWe_lIk',p:'A t-shirt design graphic featuring create a playful design on a flat black background featuring an angry cartoon frog as the central character. The frog should have a grumpy expression, wearing a cozy',st:'',su:'',pt:''},
+  {id:374,n:'Sudoku Queen',a:'YES',cat:'Typography / Text Based',fid:'1CMoetzuDwKa2jYYLIUfFY8hI1LtiltfY',p:'A t-shirt design graphic featuring create a bold and playful design on a flat black background featuring the phrase "[DESIGN_WORD_1]" in large, elegant pink lettering. Use a mix of script font for "[D',st:'',su:'',pt:''},
+  {id:375,n:'Ski you Later',a:'YES',cat:'Retro / Vintage',fid:'1WGthJlIqGf11Fu0MhiYnmKpCWAKOYhe3',p:'A t-shirt design graphic featuring create a stylish black-and-white design with a playful ski theme. At the top, in bold curved serif text, write "[DESIGN_WORD_1]", and at the bottom in elegant cursiv',st:'',su:'',pt:''},
+  {id:376,n:'Solar Eclipse 2026',a:'YES',cat:'Animals',fid:'1vT57-hqzs5JDVLLSEbCGujueFRfUciwi',p:'A vibrant, retro-style t-shirt design featuring a cool [NICHE_NAME] CHARACTER in profile looking upwards, wearing dark retro wayfarer sunglasses, set against a circular frame containing a synthwave la',st:'',su:'',pt:'B'},
+  {id:377,n:'Man I Love Fungi',a:'YES',cat:'Floral',fid:'1u1A3CgPAID3BtvKyJrgNqNr0U3z09qz1',p:'A t-shirt design graphic featuring graphic design on [BACKGROUND_TYPE] background: large centered word "[DESIGN_WORD_1]" at top in very large bold black classic serif type, capital M followed by lower',st:'',su:'',pt:''},
+  {id:378,n:'Daddy is here',a:'YES',cat:'Animals',fid:'1WZEXzpMIJFqCecL13YeJ4HsKmgJ8isuL',p:'A t-shirt design graphic featuring create a dramatic, fantasy-style design on a flat black background featuring a powerful, muscular werewolf in the center, posed confidently with arms flexed and ches',st:'',su:'',pt:''},
+  {id:383,n:'Gigi 2026',a:'YES',cat:'Typography / Text Based',fid:'1Br6uh5uZ4r7dMaIgO3brS-Rd8Z6U9emF',p:'A t-shirt design graphic featuring a trendy design on a light beige background featuring the word "[DESIGN_WORD_1]" in large, bold collegiate block letters filled with a stylish [DESIGN_WORD]pard prin',st:'',su:'',pt:''},
+  {id:384,n:'My Students are ...',a:'YES',cat:'Typography / Text Based',fid:'1tYDmlYHFfPdUzPa9d18wOuLjGO5oszB5',p:'A t-shirt design graphic featuring a cheerful and affirming design on a flat dark background (black or deep navy), featuring the bold central phrase "[DESIGN_WORD_1]" in large, retro bubble-style bloc',st:'',su:'',pt:''},
+  {id:385,n:'I’m not yelling I’m..',a:'YES',cat:'Typography / Text Based',fid:'1JyaVa5DVy98WCkqgNlQIrf3tjytydWYC',p:'A t-shirt design graphic featuring a bold and humorous design on a flat black background, featuring the phrase "[DESIGN_WORD_1]" in large, distressed, all-caps lettering. Place the text in a stacked l',st:'',su:'',pt:''},
+  {id:386,n:'Believe Cryptid Collecion',a:'YES',cat:'Retro / Vintage',fid:'1c8NHYa_FFh3aIyhvhbCQHbCnhalaNFBv',p:'A t-shirt design graphic featuring a retro-style design isolated on a [BACKGROUND_TYPE] background featuring four vertical, vintage woodcut-style panels, each with a different legendary cryptid: Bigfo',st:'',su:'',pt:''},
+  {id:388,n:'I’m doing Side Quests',a:'YES',cat:'Typography / Text Based',fid:'1cq1NSGybOuExtRHo8yjSpCeRSzGQY6VA',p:'A fantasy-inspired t-shirt design graphic featuring three cute chibi [NICHE_NAME] CHARACTERS centered in a balanced group composition. Each character wears NICHE-SPECIFIC COSTUMES and holds NICHE-SPEC',st:'',su:'',pt:''},
+  {id:389,n:'Six Seven St Patricks Day',a:'YES',cat:'Typography / Text Based',fid:'1nRtQXvG-Z62TW3gdUHCkgEDyhjY4_Wvb',p:'A t-shirt design graphic featuring old, vibrant graphic design on a pure [BACKGROUND_TYPE] background featuring a central young cartoon Leprechaun boy in bright emerald and lime green tones with thick',st:'',su:'',pt:''},
+  {id:391,n:'No Shelf Control',a:'YES',cat:'Typography / Text Based',fid:'1iGtE6LvyU3EonVko_miHf3RoB9Qr1ybC',p:'-- Image ratio 4:5 A soft pastel-colored t-shirt design graphic of a row of vintage hardbound books standing upright on a wooden shelf, with vibrant wildflowers, daisies, and leafy greenery growing wi',st:'',su:'',pt:''},
+  {id:393,n:'Round Badge a la Steve',a:'YES',cat:'Typography / Text Based',fid:'1twL7HTr7Uzr5KQVNurFImD0rsFb4WbMc',p:'A t-shirt design graphic featuring style & Medium: A vintage monoline typography emblem graphic design. Flat 2D vector art style with clean lines. High-contrast white ink isolated on a [BACKGROUND_TYP',st:'',su:'',pt:''},
+  {id:396,n:'Butterfly Groovy Text',a:'YES',cat:'Typography / Text Based',fid:'12eaVGyUfXV_hniu_PerG3DAEx8J94AEe',p:'A t-shirt design graphic featuring a cheerful and empowering design with the phrase "[DESIGN_WORD_1]" in large, bubbly retro-style lettering. The words are in soft pastel tones like yellow, peach, and',st:'',su:'',pt:''},
+  {id:398,n:'Limited Edition Year',a:'YES',cat:'Typography / Text Based',fid:'1GhMeC9RMQwKwZIKV2xisEk6yPkRqzb92',p:'A t-shirt design graphic featuring a classic retro-style design isolated on a [BACKGROUND_TYPE] background, featuring bold white text that reads "[DESIGN_WORD_1]" in large, stylized serif font. The nu',st:'',su:'',pt:''},
+  {id:399,n:'Just one more',a:'YES',cat:'Floral',fid:'1Vu2UMsqiRZamWoKyUMotthn_5AbB_l3B',p:'T-shirt graphic on a pure [BACKGROUND_TYPE] background featuring a centered, richly detailed grouping of raw crystals, geodes, and tumbled stones, all in a flat yet softly shaded vector style using on',st:'',su:'',pt:''},
+  {id:400,n:'Raptors of North America',a:'YES',cat:'Typography / Text Based',fid:'11RuGXfFwvV3dq8l47CPBrPXiX6yq0UGg',p:'A t-shirt design graphic featuring centered high-resolution vector graphic showing a 3x3 grid of dynamically perched or in-flight raptors in semi-realistic painterly style with crisp vector edges and ',st:'',su:'',pt:''},
+  {id:404,n:'Send Noods',a:'YES',cat:'Typography / Text Based',fid:'1t_1G57cEQtWRNqCQHE6kJLjEixBi6tNx',p:'A t-shirt design graphic featuring a cheeky, retro cartoon-style design featuring a smiling, anthropomorphic bowl of noodles with big eyes, noodle arms, and legs wearing sneakers. The bowl is filled w',st:'',su:'',pt:''},
+  {id:405,n:'Axolotl 6 7 Bruh',a:'YES',cat:'Typography / Text Based',fid:'1oKSenXkkJaO0LtZB_CLqJaTx-HfgH6pr',p:'A playful, vintage-style T-shirt design featuring a cartoon axolotl with a round, chubby body, smiling face, and wearing oversized black sunglasses. The axolotl is shaded in soft pink and lavender ton',st:'',su:'',pt:''},
+  {id:406,n:'Tacologist',a:'YES',cat:'Typography / Text Based',fid:'1jYJLI6N7rthTl1GOTYHJXRMQLAYHCwNv',p:'A t-shirt design graphic featuring a clever and minimalist design for light backgrounds featuring the bold, uppercase word "[DESIGN_WORD_1]" at the top in a clean, modern collegiate-style font. Beneat',st:'',su:'',pt:''},
+  {id:407,n:'Travel Landmark Sunset',a:'YES',cat:'Typography / Text Based',fid:'1Wc8LcYmDxBcK4IT7At4ndf4qICUSUOn3',p:'A stylish, vintage-inspired graphic T-shirt design featuring the word "[DESIGN_WORD_1]" in bold, tall, geometric lettering, with each letter forming a vertical panel. Inside the panels, a detailed lin',st:'',su:'',pt:''},
+  {id:408,n:'Spanish Girl Lips',a:'YES',cat:'Typography / Text Based',fid:'10Gw1NUs1jkx_p2j8-dp4S-UJCj2gmKv1',p:'A t-shirt design graphic featuring [BACKGROUND_TYPE] background. A bold, glossy design featuring a pair of highly stylized, plump lips in a vibrant, digital art style. The lips are wrapped in the offi',st:'',su:'',pt:''},
+  {id:409,n:'St Patricks Day Shenanigans',a:'YES',cat:'Typography / Text Based',fid:'1lqzQdck8O8_dS2eHEaQl8qidZfoHweVy',p:'A t-shirt design graphic featuring an excited cute looking [NICHE_NAME] CHARACTER riding a bike in a hurry and surrounded by a few st patricks day elements, "[DESIGN_WORD_1]" arched at the top and "[D',st:'',su:'',pt:''},
+  {id:411,n:'Just here for Garlic Bread',a:'YES',cat:'Space / Sci-Fi',fid:'1Tzw2zLaVQX3K77zDF8L_e7hKb37ac2wy',p:'A t-shirt design graphic featuring hot pink background graphic design with centered bold vector art of a stack of garlic bread and stylized text; at the top, arched uppercase text in bold condensed sa',st:'',su:'',pt:''},
+  {id:412,n:'This Princess Comes With',a:'YES',cat:'Typography / Text Based',fid:'15ySYZjY9lStRZ63TKLfG4ZufPva-laAB',p:'A t-shirt design graphic featuring a bold, empowering design with the phrase "[DESIGN_WORD_1]" in large, vintage-style lettering. Feature a detailed illustration of a pink and beige semi-truck with la',st:'',su:'',pt:''},
+  {id:413,n:'Promoted to Mama',a:'YES',cat:'Typography / Text Based',fid:'1A7EgJwJUBVYbJ4a_aJqKyeeChMru4e53',p:'A t-shirt design graphic featuring a floral-themed design featuring the phrase "[DESIGN_WORD_1]" in large, bold capital letters filled with a soft watercolor floral pattern in shades of pink, peach, a',st:'',su:'',pt:''},
+  {id:417,n:'Running Goose',a:'YES',cat:'Typography / Text Based',fid:'1j0e85zIqvm5uS12Nd96uGIKtFpaXPKeB',p:'A t-shirt design graphic featuring a playful, cartoon-style design featuring a running [NICHE_NAME] CHARACTER with a headband and sneakers, drawn in a cute minimal style with clean lines and flat colo',st:'',su:'',pt:''},
+  {id:418,n:'Old Man in his Seventies',a:'YES',cat:'Retro / Vintage',fid:'1_-7FQaDiaQV_X17tfZk5K8Rm_EqfcEzc',p:'A t-shirt design graphic featuring hot pink background graphic design with centered, realistic illustration of an elderly man seen from behind, riding a sleek road bicycle; he has short gray hair, a h',st:'',su:'',pt:''},
+  {id:419,n:'Chemical Symbols',a:'YES',cat:'Typography / Text Based',fid:'12hG3RUjlVznrG76JRolAyy8dgibop4cC',p:'A t-shirt design graphic featuring a vibrant educational-style design that spells out "[DESIGN_WORD_1]" using periodic table element blocks: Te = Tellurium (52), Ac = Actinium (89), H = Hydrogen (1), ',st:'',su:'',pt:''},
+  {id:421,n:'Perfect Day Schedule',a:'YES',cat:'Typography / Text Based',fid:'1BsZng-wZIC-W1nAaVg1oMTjhTt-yrIw2',p:'A t-shirt design graphic featuring a bold, vertically stacked design titled "[DESIGN_WORD_1]" in large, chunky white uppercase text at the top, underlined by a thick orange bar. Below the title, six l',st:'',su:'',pt:''},
+  {id:423,n:'Heavy Metal   Grunge',a:'YES',cat:'Typography / Text Based',fid:'1KcfyoCJXEhPHm2jV-kaz3XMNwbpQ-Cph',p:'A t-shirt design graphic featuring t‑shirt design on a [BACKGROUND_TYPE] background featuring a central evil grinning skull in detailed white and light gray shading with sharp cheekbones and deep eye ',st:'',su:'',pt:''},
+  {id:424,n:'Cottagecore',a:'YES',cat:'Typography / Text Based',fid:'140Q-vwiRnkAWzv8xLgYdPYNzbEHOR3Mx',p:'A t-shirt design graphic featuring on a solid pure hot pink background, create a centered, high-DPI, screenprint-ready vector design featuring an ornate, vintage gothic composition: at the top, in lar',st:'',su:'',pt:''},
+  {id:425,n:'Capybara Bubble Gum',a:'YES',cat:'Kawaii / Cute',fid:'1H0vW8PoywmoBsbUsNT8kn0tIm93MyrWK',p:'A t-shirt design graphic featuring a playful, high-contrast illustration of a front-facing [NICHE_NAME] CHARACTER blowing a large pink bubble gum bubble. The [NICHE_NAME] CHARACTER wears oversized sun',st:'',su:'',pt:''},
+  {id:426,n:'Coquette Bow Birthday',a:'YES',cat:'Typography / Text Based',fid:'1inLoC9sYIsC9xDRCj5oKWIfTUEkEN_PV',p:'T-shirt design, vector illustration, isolated on hot green background. A \'Groovy Coquette\' aesthetic featuring the text "[DESIGN_WORD_1]" curved at the top and "[DESIGN_WORD_2]" curved at the bottom. ',st:'',su:'',pt:''},
+  {id:427,n:'It’s My Jam',a:'YES',cat:'Typography / Text Based',fid:'1kCG34mZMvzbH-bDrSXipDofKnBrbYB1K',p:'A t-shirt design graphic featuring t‑shirt design on a pure [BACKGROUND_TYPE] background: centered, cream‑colored hand‑lettered bold sans‑serif text at top reading "[DESIGN_WORD_1]" in all caps, sligh',st:'',su:'',pt:''},
+  {id:428,n:'Dad Nutrition Facts',a:'YES',cat:'Family / Occupations',fid:'10nD1dSGEg70KRa6oTR0RUeDipjUhuuja',p:'T-shirt design on a pure [BACKGROUND_TYPE] background: white bold blocky sans-serif "[DESIGN_WORD_1]" stacked over "[DESIGN_WORD_2]" left-aligned inside a large white-ruled rectangular label, Mexican ',st:'',su:'',pt:''},
+  {id:429,n:'Split Graphic Layout',a:'YES',cat:'Typography   Text Based',fid:'1yTX3mzTa0W1Rpb__G-MqyYdkK1V0XYGw',p:'T-shirt graphic on solid pure [BACKGROUND_TYPE] background: large distressed flat vector NICHE-SPECIFIC OBJECT on the left edge, rendered predominantly in white and light gray shapes with bold black o',st:'',su:'',pt:'L'},
+  {id:431,n:'Dog Training Guide',a:'YES',cat:'Typography / Text Based',fid:'1dTVQpNU2RnF99jYSLT657Re4mKOHO8Gq',p:'A t-shirt design graphic featuring on a [BACKGROUND_TYPE] background, centered humorous T‑shirt layout: at top, two lines of bold chunky rounded sans‑serif uppercase text, slightly distressed, first l',st:'',su:'',pt:''},
+  {id:432,n:'Retro Camping Pun',a:'YES',cat:'Typography / Text Based',fid:'1l9y6T1OIWNbY6cUXuTolF30UzIwKuiKL',p:'A t-shirt design graphic featuring a retro-style black graphic design set against a [BACKGROUND_TYPE] background. The design features the phrase "[DESIGN_WORD_1]" in bold, vintage serif font with heav',st:'',su:'',pt:''},
+  {id:434,n:'Roller Skates Birthday',a:'YES',cat:'Typography / Text Based',fid:'146RmE0yrxZt8ClU3RId5kI6cU8ZuSVFK',p:'A t-shirt design graphic featuring a fun retro roller-skate themed design featuring the phrase "[DESIGN_WORD_1]" as the main focus, with "[DESIGN_WORD_2]" at the top in large bold 70s-style bubble let',st:'',su:'',pt:''},
+  {id:435,n:'My Therapist Gave Up',a:'YES',cat:'Typography / Text Based',fid:'15FiEHi81Z51_owH98UQIIr7rQRhxmoCP',p:'A t-shirt design graphic featuring a bold vintage sci-fi retro design inspired by 1950s pulp poster art. At the top, in large distressed serif lettering, the phrase "[DESIGN_WORD_1]" is arched dramati',st:'',su:'',pt:''},
+  {id:437,n:'Your Last Haw Western',a:'YES',cat:'Retro / Vintage',fid:'1II3uL6z4I1Rs-nmDOIGIJ13i2QK-dAHs',p:'A t-shirt design graphic featuring hot green background. Centered vintage western illustration of an anthropomorphic rooster strutting confidently, hands on hips, drawn in detailed black line art with',st:'',su:'',pt:''},
+  {id:438,n:'Tofu master',a:'YES',cat:'Typography / Text Based',fid:'1bmN-uN0Y75ZhAjOmiLFdqcxbWcWiCckj',p:'A t-shirt design graphic featuring vector illustration on a [BACKGROUND_TYPE] background featuring the phrase "[DESIGN_WORD_1]" at the top and "[DESIGN_WORD_2]" at the bottom in huge bold blocky sans-',st:'',su:'',pt:''},
+  {id:439,n:'Alien Hunting Starter Pack',a:'YES',cat:'Typography / Text Based',fid:'1Lp_dUmk_0jZdpfFwhTR_UqRtgGas-Npy',p:'A t-shirt design graphic featuring centered design with bold, uppercase sans-serif typography that feels like a heavy distressed screen print: first line large and wide, second line slightly smaller, ',st:'',su:'',pt:''},
+  {id:442,n:'Six Tee Golf',a:'YES',cat:'Typography / Text Based',fid:'1-VQFuEujbsAbR6ReiG4nTQFmWsriK7-1',p:'A t-shirt design graphic featuring a retro golf-themed silhouette design featuring a bold side-profile golfer mid-swing centered in front of a large vintage sunset circle made of horizontal stripes in',st:'',su:'',pt:''},
+  {id:443,n:'Wedding Anniversary',a:'YES',cat:'Typography / Text Based',fid:'1SiPrzXNue8IPxyBVk-Dgn79xA-yqZB8D',p:'A t-shirt design graphic featuring a retro groovy anniversary-style stacked typography design featuring bold rounded 70s bubble lettering with thick outlines and warm vintage tones. At the top, a curv',st:'',su:'',pt:''},
+  {id:446,n:'90\'s R&B retro casette',a:'YES',cat:'Typography / Text Based',fid:'14GoXQR__CjtvrXOMGn1zrjrCu34cWDmc',p:'A t-shirt design graphic featuring a bold retro 90s-inspired graphic design featuring a large illustrated cassette tape centered in the composition with playful Memphis-style shapes around it. At the ',st:'',su:'',pt:''},
+  {id:449,n:'Test Day Scrapbook Style',a:'YES',cat:'Typography / Text Based',fid:'1H7QHStt2ubVjmarOlWXVlia8HdBgYXGN',p:'Playful "[DESIGN_WORD_1]" typography collage design, featuring colorful mixed-style letters arranged like scrapbook cutouts. Each letter uses a different font and texture including chalk, crayon, mark',st:'',su:'',pt:''},
+  {id:451,n:'Jesus and',a:'YES',cat:'Typography / Text Based',fid:'14Z059duWuGc2qT0s8ZS99svioCoo4lFn',p:'isolated on a [BACKGROUND_TYPE] background, a monochromatic dark green T-shirt design graphic BUT not an actual mockup centered around the text "[DESIGN_WORD_1]" in a bold, textured script and block f',st:'',su:'',pt:''},
+  {id:453,n:'Rabbit Bruh Smoking',a:'YES',cat:'Typography / Text Based',fid:'1QWz--IDafxtJC6zFAg1lxV2aEIDBJWd9',p:'isolated on a [BACKGROUND_TYPE] background, a high-detail stipple-art and woodcut-style illustration of a rabbit\'s head centered in the frame. The rabbit has large, expressive ears with intricate dot-',st:'',su:'',pt:''},
+  {id:454,n:'Holiday Goose',a:'YES',cat:'Typography   Text Based',fid:'1mo2ln685i9QwaMiPgPqDv9VypELZbbYa',p:'Isolated on a [BACKGROUND_TYPE] background, a highly detailed T-shirt design graphic but not an actual mockup featuring a sassy, anthropomorphic cute animal [NICHE_NAME] CHARACTER ready for NICHE-SPEC',st:'',su:'',pt:'B'},
+  {id:456,n:'Soccer Mom Stamp',a:'NO',cat:'Typography   Text Based',fid:'1FzWnPylWFR4XLb4F96V2YCOmbCHN9d_X',p:'A t-shirt design graphic featuring a high-detail vintage distressed retro graphic design isolated on a [BACKGROUND_TYPE] background. The entire design sits on a background of thick vertical retro stri',st:'',su:'',pt:'B'},
+  {id:457,n:'Hobby Favorite Sport',a:'YES',cat:'Typography / Text Based',fid:'1W8Vy75TYAL4bRGDssdrl5nc4MfZ2910u',p:'A vintage cottagecore t-shirt design graphic in highly detailed 2D flat vector art, arranged inside a retro rectangular double-line border frame with muted teal and cream lines, placed on a [BACKGROUN',st:'',su:'',pt:''},
+  {id:459,n:'Leopard Print Pattern western',a:'YES',cat:'Typography / Text Based',fid:'1b6xUU-dQDn7z4MQxSD5LtIHq-N9VSKxt',p:'isolated on a [BACKGROUND_TYPE] background, the solid color background color is not found in the main subject for easy background removal. T-shirt design graphic BUT not an actual mockup. A highly det',st:'',su:'',pt:''},
+  {id:460,n:'Girls Like X Too Bows',a:'YES',cat:'Typography / Text Based',fid:'1e8ru4gq30mQOxvM-B5CXBB5hHL1MbLBP',p:'A t-shirt design graphic featuring centered 3x3 grid design on solid pure hot green background, alternating detailed white and light gray soccer balls with classic hexagonal stitching and pink accents',st:'',su:'',pt:''},
+  {id:461,n:'Nurse Western',a:'YES',cat:'Typography / Text Based',fid:'1OYm3pAFOodMklpQo1qnWSEX-bVLeHHm4',p:'isolated on a [BACKGROUND_TYPE] background, the solid color background color is not found in the main subject for easy background removal. A high-quality t-shirt design graphic BUT not an actual mocku',st:'',su:'',pt:''},
+  {id:463,n:'Maui Island',a:'YES',cat:'Typography / Text Based',fid:'1HIewo0GTqs5jo_EMI5wwxPiocGBaPA_6',p:'isolated on a [BACKGROUND_TYPE] background, a vintage-style distressed t-shirt design graphic featuring a central tropical landscape. The design is composed of two tall, detailed coconut palm trees in',st:'',su:'',pt:''},
+  {id:465,n:'Lord Scooter',a:'YES',cat:'Typography   Text Based',fid:'1I_19AA9wKbUkauoFeBpLGLuk6LPMqJTr',p:'T-shirt design graphic on a [BACKGROUND_TYPE] background, centered composition: at the top large arched bold blocky serif text reading "[DESIGN_WORD_1]" in bright saturated NICHE-SPECIFIC COLORS with ',st:'',su:'',pt:'B'},
+  {id:467,n:'Iced Coffee Club',a:'YES',cat:'Typography / Text Based',fid:'1oR5qUiXijsZMbBi2pdyKjxeVdHkkNR_U',p:'A t-shirt design graphic featuring sTRICTLY TWO-NICHE-SPECIFIC COLOR PALETTE graphic design on a pure white background. The ONLY colors used in the entire artwork must be EXACTLY ONE shade of warm NIC',st:'',su:'',pt:''},
+  {id:468,n:'Duo-tone Hiking Society',a:'YES',cat:'Typography / Text Based',fid:'1in15blbOGM_Go-qEOHe61oLJk1IiHgJg',p:'A t-shirt design graphic featuring a fun and lighthearted duotone design on a flat white background with bold orange text that reads "[DESIGN_WORD_1]" arched across the top in a playful, chunky upperc',st:'',su:'',pt:''},
+  {id:469,n:'Dinosaur Stamp Collection',a:'YES',cat:'Animals',fid:'10yB1XQMQZgV-RjUddRoRtRkb0hFNFlkn',p:'Isolated on a [BACKGROUND_TYPE] background, the solid color background color is not found in the main subject for easy background removal. This design graphic BUT not an actual mockup features a colle',st:'',su:'',pt:''},
+  {id:470,n:'Autism Acceptance Butterfly',a:'YES',cat:'Typography / Text Based',fid:'1DoIBTykPIVSdZygUgFpOxhkh6zDwgonp',p:'A t-shirt design graphic featuring isolated on a [BACKGROUND_TYPE] background, a highly detailed and vibrant graphic design featuring a large, stylized butterfly silhouette that acts as a frame for a ',st:'',su:'',pt:''},
+  {id:471,n:'Butterfly Rainbow',a:'YES',cat:'Floral',fid:'1d75xbERfKSWR2-b8X7Hbcd6Vaj60-ppG',p:'A t-shirt design graphic featuring retro kawaii T‑shirt graphic on a pure [BACKGROUND_TYPE] background, centered composition, crisp vector edges, high‑DPI print ready: a thick three‑band rainbow arcin',st:'',su:'',pt:''},
+  {id:472,n:'Kittens Triple Boxes',a:'YES',cat:'Retro / Vintage',fid:'1RAlr_GiQhSGklpmZ6gxrdcH65L-ES-Vm',p:'Isolated on a [BACKGROUND_TYPE] background, a high-quality hand-drawn T-shirt design graphic featuring three identical tabby kittens arranged in a horizontal row, each framed within its own vertical r',st:'',su:'',pt:''},
+  {id:474,n:'Bootleg Y2K Overstimulated',a:'YES',cat:'Animals',fid:'1W9PuQmUnWClYXNQCJOeFPhIhF7QXQDAc',p:'On a [BACKGROUND_TYPE] background, centered high-resolution T-shirt graphic featuring the text "[DESIGN_WORD_1]" at top and "[DESIGN_WORD_2]" at bottom in huge bold arched serif letters, all caps, met',st:'',su:'',pt:'B'},
+  {id:475,n:'B ootleg Y2K BBQ Adult Humor',a:'YES',cat:'Patriotic   Military',fid:'14qqpYenhotwr6OubSrwaX87R5Y-3vwCB',p:'A t-shirt design graphic featuring on a [BACKGROUND_TYPE] background, bold blocky all-caps slab-serif typography reading "[DESIGN_WORD_1]" at top and "[DESIGN_WORD_2]" at bottom, perfectly centered, l',st:'',su:'',pt:'B'},
+  {id:476,n:'Double Digits Drip Birthday',a:'YES',cat:'Typography   Text Based',fid:'19ny6RmLwmoOJKTP07-SDlmyNVeJJQWIv',p:'A t-shirt design graphic featuring on a pure [BACKGROUND_TYPE] background, bold blocky all-caps slab-serif typography reading "[DESIGN_WORD_1]" at top and "[DESIGN_WORD_2]" at bottom, perfectly center',st:'',su:'',pt:'B'},
+  {id:478,n:'Bootleg Y2k Skeleton biker',a:'YES',cat:'Typography   Text Based',fid:'1bPFUHYuTcjmTOSDD9KVqOUK2lHOr8fpX',p:'A t-shirt design graphic featuring a hyper-realistic photo collage design featuring a [NICHE_NAME] CHARACTER in dramatic poses, with fire in the background, dynamic scene, with yellow and orange color',st:'',su:'',pt:'D'},
+  {id:479,n:'Crashing out Duck',a:'YES',cat:'Typography / Text Based',fid:'1MzJ2bFGfHNPLaw5mmpgG9hCzGtlz1MPv',p:'isolated on a [BACKGROUND_TYPE] background, the solid color background color is not found in the main subject for easy background removal. T-shirt design graphic BUT not an actual mockup. A highly det',st:'',su:'',pt:''},
+  {id:482,n:'“If Lost” Naive Design',a:'YES',cat:'Typography / Text Based',fid:'1Ks6NYuugPrq0fV3aqqedeNJt9jpI7iCK',p:'isolated on a [BACKGROUND_TYPE] background, a vintage-style t-shirt design graphic BUT not an actual mockup, the solid color background color is not found in the main subject for easy background remov',st:'',su:'',pt:''},
+  {id:483,n:'Scattered Retro Panels',a:'YES',cat:'Animals',fid:'148SrS0tLw_HI4ofSSOyadkFvpsG3qlI0',p:'isolated on a [BACKGROUND_TYPE] background, the solid color background color is not found in the main subject for easy background removal, a highly detailed t-shirt design graphic BUT not an actual mo',st:'',su:'',pt:''},
+  {id:486,n:'Just A Soccer Goose',a:'YES',cat:'Typography / Text Based',fid:'1uQYEmKbMuYqeUx3qOcRjECLK2W8-LI5s',p:'isolated on a [BACKGROUND_TYPE] background, a high-detail T-shirt design graphic featuring four whimsical white [NICHE_NAME] CHARACTERS in various authentic soccer- themed poses and outfits, the first',st:'',su:'',pt:''},
+  {id:487,n:'Wine O’clock Skelton',a:'YES',cat:'Typography   Text Based',fid:'1QmGSwmfpZstT4QHnvlw-FkYU_OiS0T3-',p:'Isolated on a [BACKGROUND_TYPE] background, a highly detailed and expressive t-shirt design graphic but not an actual mockup. The illustration features a stylized skeletton radiating a relaxed and coo',st:'',su:'',pt:'B'},
+  {id:489,n:'Sandwich Distressed Naive',a:'YES',cat:'Typography / Text Based',fid:'1OBoinGADk3zNNVmOgMB5kTTb-qx4CKqA',p:'A t-shirt design graphic featuring center a bold vintage taco-themed T‑shirt design on a pure [BACKGROUND_TYPE] background: at the top, large arched text "[DESIGN_WORD_1]" and at the bottom straight t',st:'',su:'',pt:''},
+  {id:491,n:'Dachshund Bootleg Y2K',a:'YES',cat:'Animals',fid:'18EKnoQalqBn2WbVHqOkfBW5YG8pwjbRn',p:'A t-shirt design graphic featuring bold surreal T‑shirt design on solid pure black background: five realistically rendered [NICHE_NAME] CHARACTER heads on human bodies wearing bright white doctor lab ',st:'',su:'',pt:'D'},
+  {id:492,n:'Basket x Birthday',a:'YES',cat:'Typography / Text Based',fid:'1mVl8AxlNfnN2vAUVbDl7HRq7EhR3-qGZ',p:'High-contrast white graphic on solid pure black background, centered, crisp vector edges, T-shirt print ready: large bold distressed blocky sans-serif number "[DESIGN_WORD_1]" vertically on the left, ',st:'',su:'',pt:''},
+  {id:493,n:'Country X Princess',a:'YES',cat:'Floral',fid:'1-lFdZxyrCeA96r3MHxMiShaDpWiTXaI_',p:'A t-shirt design graphic featuring white background, centered cute cartoon Polish girl leaning on her hands with elbows forward, big sparkling blue eyes and fair skin, two large blonde braided buns, e',st:'',su:'',pt:''},
+  {id:494,n:'Old but Medieval',a:'YES',cat:'Animals',fid:'1pi7-qS14O8qRKpvGjv-lQx3o6tCaLFBL',p:'A t-shirt design graphic featuring highly detailed vector-style illustration on [BACKGROUND_TYPE] background of a standing anthropomorphic frog knight centered inside a tall rounded gothic arch; frog ',st:'',su:'',pt:''},
+  {id:495,n:'Apple Picking Striped Vintage',a:'YES',cat:'Typography / Text Based',fid:'1mTGnB64XZ6rNuTJeGyLOr7qwWU_Zoczv',p:'isolated on a [BACKGROUND_TYPE] background, the solid color background color is not found in the main subject for easy background removal, a highly detailed vintage-style T-shirt design graphic BUT no',st:'',su:'',pt:''},
+  {id:496,n:'Christianity Scrapbook Cutouts',a:'YES',cat:'Typography / Text Based',fid:'1uq13KDov2DxYTKpmN_ldCculSG8ydpjz',p:'A t-shirt design graphic featuring an inspirational graphic design featuring the phrase "[DESIGN_WORD_1]" rendered in a multi-textured, collage-style typography, reminiscent of cut-out letters. This c',st:'',su:'',pt:''},
+  {id:497,n:'Tri-Color Tarot Card',a:'YES',cat:'Floral',fid:'1TNzdz53xToEDFtW4S0QZxVBwJpyoebjL',p:'A t-shirt design graphic featuring vintage tarot-card style illustration on a pure [BACKGROUND_TYPE] background, centered cream rectangular frame with rounded corners and thin inner border, featuring ',st:'',su:'',pt:''},
+  {id:499,n:'Life With Chickens',a:'YES',cat:'Typography / Text Based',fid:'1_rEpM14wF_EoLjRQgHEHnADWLBVwvcF9',p:'solated on a [BACKGROUND_TYPE] background, the solid color background color is not found in the main subject for easy background removal, T- shirt design graphic BUT not an actual mockup, a highly det',st:'',su:'',pt:''},
+  {id:500,n:'Big Brother Dragons',a:'YES',cat:'Floral',fid:'18RLWi1Yc8J9YYh8LRJOG4ZaNczSaS5hW',p:'A t-shirt design graphic featuring centered kawaii dragon siblings design on a [BACKGROUND_TYPE] background, top arched text in bold rounded teal sans-serif reads "[DESIGN_WORD_1]", bottom straight te',st:'',su:'',pt:''},
+  {id:502,n:'4 Panel with Bow Senior 2026',a:'YES',cat:'Floral',fid:'1rzZManZpEZYF3xyyz5S7Q1rrH2q4ZNmz',p:'A t-shirt design graphic featuring senior 2026 graphic design on a pure [BACKGROUND_TYPE] background: four equal vertical rectangular panels with slightly rough, hand‑painted edges in a row across the',st:'',su:'',pt:''},
+  {id:503,n:'Crash Out Wavy Box Coquette',a:'YES',cat:'Typography / Text Based',fid:'1UNvYYkPLVUqrwv0tTkp7uJr2XWhQ3juO',p:'centered, high-resolution vector T-shirt design on solid pure hot pink background, featuring a cute bright green frog with a lighter green belly, wearing a small mint green bow on its head, happily ri',st:'',su:'',pt:''},
+  {id:504,n:'Yee Claw Stripy Backdrop',a:'YES',cat:'Typography   Text Based',fid:'1UHr1fn-ihPiRWopggecNHwzIICW2U-8b',p:'Isolated on a [BACKGROUND_TYPE] background, t-shirt design graphic but not an actual mockup. A humorous, vintage-style graphic of a [NICHE_NAME] CHARACTER posing as a cowboy. The [NICHE_NAME] CHARACTE',st:'',su:'',pt:'B'},
+  {id:505,n:'Artemis II Retro Illustration',a:'YES',cat:'Typography / Text Based',fid:'1XvEcRT1SXswJfaFtJYk1j5ATSVCUYWcJ',p:'isolated on a [BACKGROUND_TYPE] background, the solid color background color is not found in the main subject for easy background removal. T-shirt design graphic BUT not an actual mockup. A highly det',st:'',su:'',pt:''},
+  {id:509,n:'Dallas Girl Nutrition Label',a:'YES',cat:'Art Styles',fid:'1v6Dpysk0tCXBmic9NInXD6g2F4HfCPM5',p:'A t-shirt design graphic featuring black-on-white nutrition-label-style design, [BACKGROUND_TYPE] background, crisp high-contrast black vector graphics; centered layout with large bold geometric sans-',st:'',su:'',pt:''},
+  {id:510,n:'Friyay Vibes',a:'YES',cat:'Typography / Text Based',fid:'1w20KjqoBE6LS4_t8ncyuu2TE9vslnJFh',p:'isolated on a [BACKGROUND_TYPE] background, T-shirt design graphic BUT not an actual mockup, a vibrant and maximalist "[DESIGN_WORD_1]" typographic design featuring the word "[DESIGN_WORD_2]" split in',st:'',su:'',pt:''},
+  {id:511,n:'Pura Vida',a:'YES',cat:'Typography / Text Based',fid:'17ig3aLi163qgMyaKQGxDtG0c3AJumsOL',p:'isolated on a [BACKGROUND_TYPE] background, T-shirt design graphic BUT not an actual mockup, a retro coastal-themed design featuring a central hand-drawn vintage palm tree with muted teal fronds and a',st:'',su:'',pt:''},
+  {id:512,n:'Tired Teachers Coffee Club',a:'YES',cat:'Typography / Text Based',fid:'1X9jWIQMeked4H9l06yk-6DTRDgaxBTEc',p:'isolated on a [BACKGROUND_TYPE] background, T-shirt design graphic BUT not an actual mockup, a gritty vintage-inspired typographic design featuring the words "[DESIGN_WORD_1]" in a large bold distress',st:'',su:'',pt:''},
+  {id:516,n:'Bootleg on White',a:'YES',cat:'Animals',fid:'1YkztFJW501KsOiUGsiRUaQnNDH2jZs5v',p:'A t-shirt design graphic featuring isolated on a [BACKGROUND_TYPE] background, the solid color background color is not found in the main subject for easy background removal, T- shirt design graphic BU',st:'',su:'',pt:''},
+  {id:523,n:'Stripy Backdrop X Cowgirl',a:'YES',cat:'Typography / Text Based',fid:'1hJxeplD_WJvEaTLsBtQNsT_YxqF4CgrI',p:'isolated on a [BACKGROUND_TYPE] background, a high-detail t-shirt design graphic featuring a Western-themed layout with a vibrant color palette of hot pink and soft turquoise. The design is centered a',st:'',su:'',pt:''},
+  {id:524,n:'Garden Society Frame Design',a:'YES',cat:'Typography / Text Based',fid:'10Os_QFcSILs2DQCpxpQfUbvAT6E0zdt0',p:'isolated on a [BACKGROUND_TYPE] background, the solid color background color is not found in the main subject for easy background removal. T-shirt design graphic BUT not an actual mockup. A highly det',st:'',su:'',pt:''},
+  {id:529,n:'Van Gogh Starry Night Golf',a:'YES',cat:'Kawaii   Cute',fid:'1GksMZPM-WaWIBAsljNp-aMyrMzzq4L07',p:'A t-shirt design graphic featuring a whimsical design inspired by Van Gogh\'s Starry Night, featuring a [NICHE_NAME] CHARACTER. It is illustrated with expressive, swirling brushstrokes in shades of blu',st:'',su:'',pt:'B'},
+  {id:531,n:'4 Paper Cutouts US Pride',a:'YES',cat:'Floral',fid:'1QACE4iLfC5ZV78xOlvDfKSqswdwgR5TZ',p:'A beautiful watercolor t-shirt design graphic on a [BACKGROUND_TYPE] background featuring four vertical torn-edge paper strip panels side by side, each showing a different [NICHE_NAME]-themed scene. E',st:'',su:'',pt:'B'},
+  {id:532,n:'Plant Mom Club Doodle',a:'YES',cat:'Typography / Text Based',fid:'1Kp0oSxlggtS4pWNOyWL8RSxbCrY0faQG',p:'Cute hand-drawn doodle-style t-shirt design with the text "[DESIGN_WORD]" in the center, written in a playful, bouncy handwritten script font in warm brown. Surrounding the text is a charming arrangem',st:'',su:'',pt:''},
+  {id:542,n:'Lincoln Music Painting',a:'YES',cat:'Animals',fid:'1yP3QWu-OHnkvkHNssZbfWKi-520502Ko',p:'Vintage renaissance t-shirt design graphic, ultra-realistic cinematic oil painting style portrait of [NICHE_NAME] HISTORICAL [NICHE_NAME] CHARACTER completely grooving to heavy music with raw [DESIGN_',st:'',su:'',pt:''},
+  {id:543,n:'Goose School Feral',a:'NO',cat:'Floral',fid:'16g-n3cBLWHQcwZnQXjcGALKn-4ca4-4q',p:'isolated on a [BACKGROUND_TYPE] background, the solid color background color is not found in the main subject for easy background removal, a highly detailed and whimsical t-shirt design graphic featur',st:'',su:'',pt:''}
+];
+
+const votes={};
+const edits={};
+let cur=0,filter='pending';
+
+function imgUrl(fid){return 'https://drive.google.com/thumbnail?id='+fid+'&sz=w500';}
+function getList(){
+  if(filter==='pending') return P.filter(p=>!votes[p.id]);
+  if(filter==='done') return P.filter(p=>votes[p.id]==='ok');
+  if(filter==='skip') return P.filter(p=>votes[p.id]==='skip');
+  return P;
+}
+function counts(){
+  const ok=Object.values(votes).filter(v=>v==='ok').length;
+  const sk=Object.values(votes).filter(v=>v==='skip').length;
+  return{ok,sk,pending:P.length-ok-sk,total:P.length};
+}
+function saveEdit(field,val){
+  const L=getList();const p=L[cur];if(!p)return;
+  if(!edits[p.id])edits[p.id]={};
+  edits[p.id][field]=val;
+}
+function vote(v){
+  const L=getList();const p=L[cur];if(!p)return;
+  if(edits[p.id]){
+    if(edits[p.id].st!==undefined)p.st=edits[p.id].st;
+    if(edits[p.id].su!==undefined)p.su=edits[p.id].su;
+    if(edits[p.id].pt!==undefined)p.pt=edits[p.id].pt;
+  }
+  votes[p.id]=v;
+  const nL=getList();
+  if(cur>=nL.length)cur=Math.max(0,nL.length-1);
+  render();
+}
+function setFilter(f){filter=f;cur=0;render();}
+function mkOpts(arr,val){return arr.map(v=>'<option value="'+v+'"'+(v===val?' selected':'')+'>'+( v||'— ninguno')+'</option>').join('');}
+function exportCSV(){
+  const rows=[['PROMPT_ID','STYLE_NAME','STYLE','SUBJECT','PRINTING_TYPE']];
+  P.forEach(p=>rows.push([p.id,p.n,p.st,p.su,p.pt]));
+  const csv=rows.map(r=>r.map(v=>'"'+(v||'')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='prompts_audit_v2.csv';a.click();
+}
+function render(){
+  const c=counts();
+  const L=getList();
+  const done=c.ok+c.sk;
+  const pct=Math.round((done/c.total)*100);
+  document.getElementById('prog').textContent=done+'/'+c.total+' revisados · '+pct+'%';
+  document.getElementById('stats').innerHTML=
+    '<span class="stat ok">✓ '+c.ok+'</span>'+
+    '<span class="stat sk">→ '+c.sk+'</span>'+
+    '<span class="stat">'+c.pending+' pendientes</span>';
+  document.getElementById('fbar').innerHTML=
+    '<button class="fb '+(filter==='pending'?'on':'')+'" onclick="setFilter(\'pending\')">Pendientes ('+c.pending+')</button>'+
+    '<button class="fb '+(filter==='all'?'on':'')+'" onclick="setFilter(\'all\')">Todos</button>'+
+    '<button class="fb '+(filter==='done'?'on':'')+'" onclick="setFilter(\'done\')">Listos ('+c.ok+')</button>'+
+    (done>0?'<button class="exp" onclick="exportCSV()">↓ Exportar CSV</button>':'');
+  if(L.length===0){document.getElementById('main').innerHTML='<div class="empty">Sin prompts en este filtro.</div>';return;}
+  if(cur>=L.length)cur=0;
+  const p=L[cur];
+  const e=edits[p.id]||{};
+  const st=e.st!==undefined?e.st:p.st;
+  const su=e.su!==undefined?e.su:p.su;
+  const pt=e.pt!==undefined?e.pt:p.pt;
+  const ptOpts=['','D','L','B','D+L','D+B','L+B','D+L+B'].map(v=>'<option value="'+v+'"'+(pt===v?' selected':'')+'>'+( v||'—')+'</option>').join('');
+  document.getElementById('main').innerHTML=`
+<div class="card">
+  <div class="chdr">
+    <div>
+      <div class="pname">ID ${p.id} — ${p.n}</div>
+      <div class="meta">
+        <span class="bdg ${p.a==='YES'?'yes':'no'}">${p.a==='YES'?'ACTIVE':'INACTIVE'}</span>
+        <span class="bdg">${p.cat}</span>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#555;">${cur+1} / ${L.length}</div>
+  </div>
+  <div class="grid">
+    <div>
+      <div class="lbl">Imagen de referencia</div>
+      <div class="ibox" id="ib">
+        <img src="${imgUrl(p.fid)}" alt="Prompt ${p.id}"
+          onload="document.getElementById('ib').style.minHeight='auto'"
+          onerror="document.getElementById('ib').innerHTML='<div class=\\'noimg\\'>No cargo<br><a href=\\'https://drive.google.com/file/d/${p.fid}/view\\' target=\\'_blank\\'>Abrir en Drive</a></div>'" />
+      </div>
+    </div>
+    <div>
+      <div class="lbl">Prompt</div>
+      <div class="ptext">${p.p}</div>
+    </div>
+  </div>
+  <div class="fields">
+    <div class="field">
+      <label>Style</label>
+      <select onchange="saveEdit('st',this.value)">${mkOpts(STYLES,st)}</select>
+    </div>
+    <div class="field">
+      <label>Subject</label>
+      <select onchange="saveEdit('su',this.value)">${mkOpts(SUBJECTS,su)}</select>
+    </div>
+    <div class="field">
+      <label>Printing type</label>
+      <select onchange="saveEdit('pt',this.value)">${ptOpts}</select>
+    </div>
+  </div>
+  <div class="acts">
+    <button class="btn ok" onclick="vote('ok')">✓ Listo</button>
+    <button class="btn sk" onclick="vote('skip')">→ Skip</button>
+  </div>
+  <div class="nav">
+    <button class="btn" onclick="if(cur>0){cur--;render();}" ${cur===0?'disabled':''} style="flex:0.4;font-size:12px;">← Anterior</button>
+    <button class="btn" onclick="if(cur<getList().length-1){cur++;render();}" ${cur===L.length-1?'disabled':''} style="flex:0.4;font-size:12px;">Siguiente →</button>
+  </div>
+</div>`;
+}
+render();
+</script>
+</body>
+</html>
