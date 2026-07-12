@@ -15,6 +15,7 @@ h1{font-size:18px;font-weight:500;margin-bottom:4px;color:#fff}
 .stats{display:flex;gap:6px;flex-wrap:wrap}
 .stat{font-size:12px;padding:3px 10px;border-radius:6px;border:1px solid #333;color:#888;background:#1a1a1a}
 .stat.ok{border-color:#2d5a2d;color:#4caf50;background:#1a2e1a}
+.stat.bad{border-color:#5a2d2d;color:#f44336;background:#2e1a1a}
 .stat.sk{border-color:#5a4d2d;color:#ff9800;background:#2e2a1a}
 .card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
 .chdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;gap:12px}
@@ -42,6 +43,8 @@ h1{font-size:18px;font-weight:500;margin-bottom:4px;color:#fff}
 .btn:hover{background:#222}
 .btn.ok{border-color:#2d5a2d;color:#4caf50}
 .btn.ok:hover{background:#1a2e1a}
+.btn.bad{border-color:#5a2d2d;color:#f44336}
+.btn.bad:hover{background:#2e1a1a}
 .btn.sk{border-color:#5a4d2d;color:#ff9800}
 .btn.sk:hover{background:#2e2a1a}
 .btn:disabled{opacity:.4;cursor:default}
@@ -282,13 +285,15 @@ function imgUrl(fid){return 'https://drive.google.com/thumbnail?id='+fid+'&sz=w5
 function getList(){
   if(filter==='pending') return P.filter(p=>!votes[p.id]);
   if(filter==='done') return P.filter(p=>votes[p.id]==='ok');
+  if(filter==='bad') return P.filter(p=>votes[p.id]==='bad');
   if(filter==='skip') return P.filter(p=>votes[p.id]==='skip');
   return P;
 }
 function counts(){
   const ok=Object.values(votes).filter(v=>v==='ok').length;
+  const bad=Object.values(votes).filter(v=>v==='bad').length;
   const sk=Object.values(votes).filter(v=>v==='skip').length;
-  return{ok,sk,pending:P.length-ok-sk,total:P.length};
+  return{ok,bad,sk,pending:P.length-ok-bad-sk,total:P.length};
 }
 function saveEdit(field,val){
   const L=getList();const p=L[cur];if(!p)return;
@@ -310,8 +315,8 @@ function vote(v){
 function setFilter(f){filter=f;cur=0;render();}
 function mkOpts(arr,val){return arr.map(v=>'<option value="'+v+'"'+(v===val?' selected':'')+'>'+( v||'— ninguno')+'</option>').join('');}
 function exportCSV(){
-  const rows=[['PROMPT_ID','STYLE_NAME','STYLE','SUBJECT','PRINTING_TYPE']];
-  P.forEach(p=>rows.push([p.id,p.n,p.st,p.su,p.pt]));
+  const rows=[['PROMPT_ID','STYLE_NAME','STYLE','SUBJECT','PRINTING_TYPE','COINCIDE']];
+  P.forEach(p=>rows.push([p.id,p.n,p.st,p.su,p.pt,votes[p.id]==='bad'?'NO':'SI']));
   const csv=rows.map(r=>r.map(v=>'"'+(v||'')+'"').join(',')).join('\n');
   const blob=new Blob([csv],{type:'text/csv'});
   const a=document.createElement('a');
@@ -320,18 +325,20 @@ function exportCSV(){
 function render(){
   const c=counts();
   const L=getList();
-  const done=c.ok+c.sk;
+  const done=c.ok+c.bad+c.sk;
   const pct=Math.round((done/c.total)*100);
   document.getElementById('prog').textContent=done+'/'+c.total+' revisados · '+pct+'%';
   document.getElementById('stats').innerHTML=
     '<span class="stat ok">✓ '+c.ok+'</span>'+
+    '<span class="stat bad">✗ '+c.bad+'</span>'+
     '<span class="stat sk">→ '+c.sk+'</span>'+
     '<span class="stat">'+c.pending+' pendientes</span>';
   document.getElementById('fbar').innerHTML=
     '<button class="fb '+(filter==='pending'?'on':'')+'" onclick="setFilter(\'pending\')">Pendientes ('+c.pending+')</button>'+
     '<button class="fb '+(filter==='all'?'on':'')+'" onclick="setFilter(\'all\')">Todos</button>'+
+    '<button class="fb '+(filter==='bad'?'on':'')+'" onclick="setFilter(\'bad\')">No coinciden ('+c.bad+')</button>'+
     '<button class="fb '+(filter==='done'?'on':'')+'" onclick="setFilter(\'done\')">Listos ('+c.ok+')</button>'+
-    (done>0?'<button class="exp" onclick="exportCSV()">↓ Exportar CSV</button>':'');
+    '<button class="exp" onclick="exportCSV()">↓ Exportar CSV</button>';
   if(L.length===0){document.getElementById('main').innerHTML='<div class="empty">Sin prompts en este filtro.</div>';return;}
   if(cur>=L.length)cur=0;
   const p=L[cur];
@@ -382,6 +389,7 @@ function render(){
   </div>
   <div class="acts">
     <button class="btn ok" onclick="vote('ok')">✓ Listo</button>
+    <button class="btn bad" onclick="vote('bad')">✗ No coincide</button>
     <button class="btn sk" onclick="vote('skip')">→ Skip</button>
   </div>
   <div class="nav">
