@@ -9,15 +9,11 @@
   :root {
     --bg: #1a1a1a; --surface: #242424; --surface2: #2e2e2e;
     --border: #3a3a3a; --accent: #e8c547; --accent2: #7ec8a4;
-    --text: #f0f0f0; --text2: #888; --radius: 6px;
+    --text: #f0f0f0; --text2: #888; --danger: #e06c75; --radius: 6px;
   }
   body { background: var(--bg); color: var(--text); font-family: 'SF Mono', monospace; font-size: 13px; min-height: 100vh; }
 
-  header {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 10px 20px; display: flex; align-items: center; gap: 12px;
-    position: sticky; top: 0; z-index: 100;
-  }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
   header h1 { font-size: 13px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; }
   .badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 2px 7px; font-size: 11px; color: var(--text2); }
   .badge.live { color: var(--accent2); border-color: var(--accent2); }
@@ -32,7 +28,6 @@
   .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .3s; }
   .progress-label { color: var(--text2); font-size: 11px; white-space: nowrap; }
 
-  /* Upload */
   #upload-zone { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(100vh - 45px); gap: 14px; padding: 40px; }
   .drop-area { border: 2px dashed var(--border); border-radius: 10px; padding: 50px 70px; text-align: center; cursor: pointer; transition: all .2s; max-width: 440px; width: 100%; }
   .drop-area:hover, .drop-area.drag { border-color: var(--accent); background: rgba(232,197,71,.04); }
@@ -41,65 +36,42 @@
   .drop-area p { color: var(--text2); font-size: 11px; }
   #file-input { display: none; }
 
-  /* Main layout */
   #main { display: none; }
   .layout { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 88px); }
 
-  /* Card list — compact */
   .card-list { border-right: 1px solid var(--border); overflow-y: auto; max-height: calc(100vh - 88px); }
-  .prompt-card {
-    display: flex; align-items: center; gap: 8px;
-    padding: 7px 12px; border-bottom: 1px solid var(--border);
-    cursor: pointer; transition: background .1s;
-  }
+  .prompt-card { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; border-left: 2px solid transparent; }
   .prompt-card:hover { background: var(--surface); }
-  .prompt-card.active { background: var(--surface); border-left: 2px solid var(--accent); }
-  .prompt-card.done { border-left: 2px solid var(--accent2); }
+  .prompt-card.active { background: var(--surface); border-left-color: var(--accent); }
+  .prompt-card.done { border-left-color: var(--accent2); }
+  .prompt-card.inactive { opacity: 0.45; }
   .card-num { font-size: 10px; color: var(--text2); min-width: 22px; }
   .card-id { font-size: 11px; color: var(--accent); font-weight: 600; min-width: 32px; }
   .card-name { font-size: 12px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .card-pt { font-size: 10px; color: var(--text2); background: var(--surface2); border-radius: 3px; padding: 1px 5px; }
   .card-check { font-size: 11px; color: var(--accent2); }
 
-  /* Panel */
-  .panel {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    min-height: calc(100vh - 88px);
-  }
-
-  /* Left: image + meta */
-  .panel-left {
-    border-right: 1px solid var(--border);
-    display: flex; flex-direction: column;
-    overflow-y: auto;
-  }
+  .panel { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 88px); }
+  .panel-left { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
   .panel-img { width: 100%; aspect-ratio: 1; object-fit: contain; background: #111; display: block; }
   .panel-img-placeholder { width: 100%; aspect-ratio: 1; background: #111; display: flex; align-items: center; justify-content: center; color: var(--text2); font-size: 11px; }
 
   .meta-fields { padding: 14px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
-
   .field label { display: block; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 4px; }
-  .field input, .field select, .field textarea {
-    width: 100%; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 5px; color: var(--text); font-family: inherit; font-size: 12px;
-    padding: 6px 9px; transition: border-color .15s;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
-
-  /* Multi-select style */
-  .style-grid { display: flex; flex-wrap: wrap; gap: 5px; }
-  .style-btn {
-    padding: 4px 9px; border-radius: 4px; border: 1px solid var(--border);
-    background: var(--surface2); color: var(--text2); cursor: pointer;
-    font-family: inherit; font-size: 11px; transition: all .15s;
-  }
-  .style-btn.selected { border-color: #c792ea; color: #c792ea; background: rgba(199,146,234,.1); }
-
-  /* Subject dropdown */
+  .field input, .field select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; color: var(--text); font-family: inherit; font-size: 12px; padding: 6px 9px; transition: border-color .15s; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
   .field select option { background: var(--surface2); }
 
-  /* Printing type */
+  /* Active toggle */
+  .active-toggle { display: flex; gap: 6px; }
+  .active-btn { flex: 1; padding: 6px; border-radius: 5px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 700; text-align: center; transition: all .15s; }
+  .active-btn.yes { background: #1e3a1e; border-color: var(--accent2); color: var(--accent2); }
+  .active-btn.no { background: #3a1e1e; border-color: var(--danger); color: var(--danger); }
+
+  .style-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+  .style-btn { padding: 4px 9px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; font-family: inherit; font-size: 11px; transition: all .15s; }
+  .style-btn.selected { border-color: #c792ea; color: #c792ea; background: rgba(199,146,234,.1); }
+
   .printing-group { display: flex; gap: 6px; }
   .printing-btn { flex: 1; padding: 6px; border-radius: 5px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 700; text-align: center; transition: all .15s; }
   .printing-btn.active-D { background: #1e3a5f; border-color: #4a7ac8; color: #89ddff; }
@@ -108,23 +80,9 @@
 
   .panel-actions { padding: 12px 14px; border-top: 1px solid var(--border); display: flex; gap: 6px; }
 
-  /* Right: prompt */
   .panel-right { display: flex; flex-direction: column; padding: 20px; gap: 10px; }
   .panel-right label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: .07em; }
-  .prompt-textarea {
-    flex: 1;
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 13px;
-    line-height: 1.7;
-    padding: 14px;
-    resize: none;
-    min-height: 400px;
-  }
+  .prompt-textarea { flex: 1; width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: inherit; font-size: 13px; line-height: 1.7; padding: 14px; resize: none; min-height: 400px; }
   .prompt-textarea:focus { outline: none; border-color: var(--accent); }
   .prompt-hint { font-size: 11px; color: var(--text2); }
 
@@ -165,20 +123,22 @@
 
 <div id="main">
   <div class="layout">
-    <!-- Left: card list -->
     <div class="card-list" id="card-list"></div>
-
-    <!-- Right: panel -->
     <div id="panel-empty" class="panel-empty">← Select a prompt to review</div>
     <div class="panel" id="panel-content" style="display:none">
-
-      <!-- Panel left: image + meta -->
       <div class="panel-left">
         <div id="panel-img-wrap"></div>
         <div class="meta-fields">
           <div class="field">
             <label>Prompt ID</label>
             <input type="text" id="f-id" readonly>
+          </div>
+          <div class="field">
+            <label>Active</label>
+            <div class="active-toggle">
+              <div class="active-btn" id="btn-active-yes" onclick="setActive('YES')">YES</div>
+              <div class="active-btn" id="btn-active-no" onclick="setActive('NO')">NO</div>
+            </div>
           </div>
           <div class="field">
             <label>Style Name</label>
@@ -233,11 +193,10 @@
         </div>
       </div>
 
-      <!-- Panel right: prompt -->
       <div class="panel-right">
         <label>Prompt — edit freely</label>
         <textarea class="prompt-textarea" id="f-prompt"></textarea>
-        <div class="prompt-hint">Use [DESIGN_WORD], [DESIGN_WORD_1], [DESIGN_WORD_2], [BACKGROUND_TYPE] as placeholders</div>
+        <div class="prompt-hint">Placeholders: [NICHE_NAME] [DESIGN_WORD_1] [DESIGN_WORD_2] [BACKGROUND_TYPE]</div>
       </div>
     </div>
   </div>
@@ -246,7 +205,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-let prompts = [], currentIdx = -1, printing = '', selectedStyles = [];
+let prompts = [], currentIdx = -1, printing = '', selectedStyles = [], activeVal = 'YES';
 
 function handleDrop(e) {
   e.preventDefault();
@@ -303,8 +262,9 @@ function renderCards() {
     const id = p.PROMPT_ID || '';
     const name = p.STYLE_NAME || '';
     const pt = p.PRINTING_TYPE || '';
+    const isInactive = (p.ACTIVE || 'YES').toUpperCase() === 'NO';
     const el = document.createElement('div');
-    el.className = 'prompt-card' + (p._done ? ' done' : '');
+    el.className = 'prompt-card' + (p._done ? ' done' : '') + (isInactive ? ' inactive' : '');
     el.id = 'card-' + i;
     el.onclick = () => selectPrompt(i);
     el.innerHTML = `
@@ -335,7 +295,9 @@ function selectPrompt(idx) {
   document.getElementById('f-image-url').value = p.IMAGE_URL || '';
   document.getElementById('f-subject').value = p.SUBJECT || '';
 
-  // Style multi-select
+  activeVal = (p.ACTIVE || 'YES').toUpperCase();
+  updateActiveBtns();
+
   const styleVal = p.STYLE || '';
   selectedStyles = styleVal ? styleVal.split(',').map(s => s.trim()).filter(Boolean) : [];
   document.querySelectorAll('.style-btn').forEach(btn => {
@@ -345,7 +307,6 @@ function selectPrompt(idx) {
   printing = p.PRINTING_TYPE || '';
   updatePrintingBtns();
 
-  // Image
   const imgWrap = document.getElementById('panel-img-wrap');
   const url = p.IMAGE_URL || '';
   if (url) {
@@ -360,15 +321,23 @@ function selectPrompt(idx) {
   document.getElementById('btn-next').disabled = idx === prompts.length - 1;
 }
 
+function setActive(val) {
+  activeVal = val;
+  updateActiveBtns();
+  // update card opacity immediately
+  const card = document.getElementById('card-' + currentIdx);
+  if (card) card.classList.toggle('inactive', val === 'NO');
+}
+
+function updateActiveBtns() {
+  document.getElementById('btn-active-yes').className = 'active-btn' + (activeVal === 'YES' ? ' yes' : '');
+  document.getElementById('btn-active-no').className = 'active-btn' + (activeVal === 'NO' ? ' no' : '');
+}
+
 function toggleStyle(btn) {
   const val = btn.dataset.val;
-  if (selectedStyles.includes(val)) {
-    selectedStyles = selectedStyles.filter(s => s !== val);
-    btn.classList.remove('selected');
-  } else {
-    selectedStyles.push(val);
-    btn.classList.add('selected');
-  }
+  if (selectedStyles.includes(val)) { selectedStyles = selectedStyles.filter(s => s !== val); btn.classList.remove('selected'); }
+  else { selectedStyles.push(val); btn.classList.add('selected'); }
 }
 
 function setPrinting(val) {
@@ -385,6 +354,7 @@ function updatePrintingBtns() {
 function saveCurrentFields() {
   if (currentIdx < 0) return;
   const p = prompts[currentIdx];
+  p.ACTIVE = activeVal;
   p.STYLE_NAME = document.getElementById('f-name').value;
   p.STYLE = selectedStyles.join(', ');
   p.SUBJECT = document.getElementById('f-subject').value;
@@ -392,8 +362,6 @@ function saveCurrentFields() {
   p.PRINTING_TYPE = printing;
   p.PROMPT = document.getElementById('f-prompt').value;
   p.IMAGE_URL = document.getElementById('f-image-url').value;
-
-  // Update card
   const card = document.getElementById('card-' + currentIdx);
   if (card) {
     const ptEl = card.querySelector('.card-pt');
@@ -416,10 +384,7 @@ function saveAndNext() {
   if (currentIdx < prompts.length - 1) selectPrompt(currentIdx + 1);
 }
 
-function navigate(dir) {
-  saveCurrentFields();
-  selectPrompt(currentIdx + dir);
-}
+function navigate(dir) { saveCurrentFields(); selectPrompt(currentIdx + dir); }
 
 function updateProgress() {
   const done = prompts.filter(p => p._done).length;
@@ -430,7 +395,7 @@ function updateProgress() {
 
 function exportCSV() {
   saveCurrentFields();
-  const headers = ['PROMPT_ID','STYLE_NAME','CATEGORY','STYLE','SUBJECT','PRINTING_TYPE','PROMPT','IMAGE_URL'];
+  const headers = ['PROMPT_ID','ACTIVE','STYLE_NAME','CATEGORY','STYLE','SUBJECT','PRINTING_TYPE','PROMPT','IMAGE_URL'];
   const rows = [headers.join(',')];
   prompts.forEach(p => {
     rows.push(headers.map(h => '"' + String(p[h] || '').replace(/"/g, '""') + '"').join(','));
