@@ -174,6 +174,16 @@
             <input type="text" id="f-category" placeholder="Typography, Animals, Floral...">
           </div>
           <div class="field">
+            <label>Background</label>
+            <select id="f-background">
+              <option value="Solid GREEN_NEON">Solid GREEN_NEON</option>
+              <option value="Solid BLACK">Solid BLACK</option>
+              <option value="Solid WHITE">Solid WHITE</option>
+              <option value="Solid GRAY">Solid GRAY</option>
+              <option value="HOT PINK">HOT PINK</option>
+            </select>
+          </div>
+          <div class="field">
             <label>Printing Type</label>
             <div class="printing-group">
               <div class="printing-btn" id="btn-D" onclick="setPrinting('D')">D</div>
@@ -294,6 +304,7 @@ function selectPrompt(idx) {
   document.getElementById('f-prompt').value = p.PROMPT || '';
   document.getElementById('f-image-url').value = p.IMAGE_URL || '';
   document.getElementById('f-subject').value = p.SUBJECT || '';
+  document.getElementById('f-background').value = p.BACKGROUND_TYPE || 'Solid GREEN_NEON';
 
   activeVal = (p.ACTIVE || 'YES').toUpperCase();
   updateActiveBtns();
@@ -359,6 +370,7 @@ function saveCurrentFields() {
   p.STYLE = selectedStyles.join(', ');
   p.SUBJECT = document.getElementById('f-subject').value;
   p.CATEGORY = document.getElementById('f-category').value;
+  p.BACKGROUND_TYPE = document.getElementById('f-background').value;
   p.PRINTING_TYPE = printing;
   p.PROMPT = document.getElementById('f-prompt').value;
   p.IMAGE_URL = document.getElementById('f-image-url').value;
@@ -395,7 +407,7 @@ function updateProgress() {
 
 function exportCSV() {
   saveCurrentFields();
-  const headers = ['PROMPT_ID','ACTIVE','STYLE_NAME','CATEGORY','STYLE','SUBJECT','PRINTING_TYPE','PROMPT','IMAGE_URL'];
+  const headers = ['PROMPT_ID','ACTIVE','STYLE_NAME','CATEGORY','STYLE','SUBJECT','PRINTING_TYPE','BACKGROUND_TYPE','PROMPT','IMAGE_URL'];
   const rows = [headers.join(',')];
   prompts.forEach(p => {
     rows.push(headers.map(h => '"' + String(p[h] || '').replace(/"/g, '""') + '"').join(','));
